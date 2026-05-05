@@ -1,0 +1,17 @@
+# Executable
+ircserv
+
+# Object files
+*.o
+
+# Dependency files
+*.d
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE folders
+.vscode/
+.idea/
+*.swp
