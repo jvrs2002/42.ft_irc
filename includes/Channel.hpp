@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
+/*   By: manelcarvalho <manelcarvalho@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:03 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/13 20:01:21 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/05/14 16:44:28 by manelcarval      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,9 @@
 class Channel
 {
 private:
-	/* data */
+		std::string					_channel_name;
+		std::vector<std::string>	_users;
+		
 public:
 	Channel(/* args */);
 	~Channel();

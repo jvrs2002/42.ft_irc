@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Commands.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
+/*   By: manelcarvalho <manelcarvalho@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:15 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/13 19:56:25 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/05/14 16:56:36 by manelcarval      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,14 +22,16 @@
 #include <poll.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include "Message.hpp"
 
 class Commands
 {
 private:
-	/* data */
+		
 public:
-	Commands(/* args */);
+	Commands();
 	~Commands();
+	void handler(Message curr_msg); 
 };
 
 Commands::Commands()
