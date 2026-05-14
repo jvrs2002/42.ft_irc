@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:25 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/13 19:59:35 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/05/14 16:10:29 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,19 +24,22 @@
 #include <fcntl.h>
 #include "Channel.hpp"
 #include "Client.hpp"
+#include "Commands.hpp"
 
 class Server
 {
 private:
-	std::string _ip; // usually 0.0.0.0
+	std::string	_ip; // usually 0.0.0.0
 	int	_port;
 	int	_fd; // server's socket fd
 
-	std::map<std::string, Channel> _channels;
-	std::map<int, Client> _clients;
+	Commands	command_handler;
+	std::map<std::string, Channel>	_channels; // each channel is mapped by their name
+	std::map<int, Client>	_clients; // each client is mapped by it's socket fd
 public:
 	Server(/* args */);
 	~Server();
+	Client	search_user(std::string username);
 };
 
 Server::Server()
