@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:08 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/18 17:00:29 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/05/18 21:10:11 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,7 @@ private:
 public:
 	Client(std::string ip, int port, int fd, std::string buffer);
 	~Client();
+	int	get_fd();
 };
 
 #endif
