@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:08 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/18 21:10:11 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/05/20 16:40:35 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,12 +35,12 @@ private:
 	bool	_authenticated;
 	bool	_registered;
 
-	std::set<Channel*> _channels; // stores channels pointers, maximum 10 channels
+	std::set<Channel*> _channels; // stores channels pointers, maximum 10 channels per user
 
 	std::string	_ip;
 	int	_port;
 
-	int	_fd; // client's socket fd
+	int	_socket_fd; // client's socket fd
 
 	std::string	_buffer;
 public:
