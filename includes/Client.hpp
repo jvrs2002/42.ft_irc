@@ -6,23 +6,24 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:08 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/13 19:59:44 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/05/18 21:10:11 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CLIENT_HPP
-#define CLIENT_HPP
+# define CLIENT_HPP
 
-#include <iostream>
-#include <vector>
-#include <map>
-#include <string>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <poll.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include "Channel.hpp"
+# include <iostream>
+# include <vector>
+# include <map>
+# include <string>
+# include <sys/socket.h>
+# include <netinet/in.h>
+# include <poll.h>
+# include <unistd.h>
+# include <fcntl.h>
+# include <set>
+# include "Channel.hpp"
 
 class Client
 {
@@ -34,7 +35,7 @@ private:
 	bool	_authenticated;
 	bool	_registered;
 
-	std::vector<std::string> _channels; // stores only channels names
+	std::set<Channel*> _channels; // stores channels pointers, maximum 10 channels
 
 	std::string	_ip;
 	int	_port;
@@ -43,16 +44,9 @@ private:
 
 	std::string	_buffer;
 public:
-	Client(/* args */);
+	Client(std::string ip, int port, int fd, std::string buffer);
 	~Client();
+	int	get_fd();
 };
-
-Client::Client()
-{
-}
-
-Client::~Client()
-{
-}
 
 #endif
