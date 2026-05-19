@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:25 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/19 14:56:04 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/05/19 15:27:36 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ private:
 public:
 	Server(std::string ip, int port, std::string password);
 	~Server();
+	void		init_server(std::string ip, int port, std::string password, int socket_fd);
 	Client*		create_user(int fd, const std::string& ip, int port);
 	void		delete_user(Client *user);
 };
