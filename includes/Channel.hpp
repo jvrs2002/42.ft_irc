@@ -6,7 +6,7 @@
 /*   By: manelcarvalho <manelcarvalho@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:03 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/18 12:06:44 by manelcarval      ###   ########.fr       */
+/*   Updated: 2026/05/20 18:21:42 by manelcarval      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,36 +22,37 @@
 #include <poll.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <set>
+#include "Client.hpp"
 
 class Channel
 {
 private:
-		std::string					_channel_name;
-		std::vector<std::string>	_users;
-		std::vector<std::string>	_operators;
-		std::string					_topic;
-		
-		// mandatory modes
-		bool _invite;
-		bool _topic;
-		bool _password_active;
-		std::string _password;
-		bool _user_limit_active;
-		int _user_limit;
-		
-				
+	std::string				_channel_name;
+	std::set<Client*>		_users;
+	std::set<Client*>		_operators;
+	
+	// mandatory modes
+	bool _invite_active;
+	std::set<std::string> _invited;
+	bool _topic_active;
+	std::string	_topic;
+	bool _password_active;
+	std::string _password;
+	bool _user_limit_active;
+	int _user_limit;
 		
 public:
-	Channel(/* args */);
+	Channel();
+	Channel(const std::string channel_name, Client* creator);
+	Channel(const Channel& other);
+	Channel& operator=(const Channel &other);
 	~Channel();
+
+	void	joinChannel(Client* new_user, std::string password = "");
+	void	partChannel(Client* user_delete);
+
+	
 };
-
-Channel::Channel()
-{
-}
-
-Channel::~Channel()
-{
-}
 
 #endif
