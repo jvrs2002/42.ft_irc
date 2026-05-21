@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/20 17:13:13 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/05/20 22:35:13 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,12 @@ Server::~Server()
 
 void	Server::init_server(std::string ip, int port, std::string password, int socket_fd)
 {
+	int	status;
+	struct addrinfo	hints;
+	struct addrinfo	*serv_info;
+
+	memset(&hints, 0, sizeof hints);
+	getaddrinfo(NULL, _port, &hints, &serv_info);
 	_socket_fd = socket(PF_INET, SOCK_STREAM, 0);
 
 	if (_socket_fd == -1) {

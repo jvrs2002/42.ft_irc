@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:25 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/20 17:12:15 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/05/20 22:18:22 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include <string>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <netdb.h>
 #include <netinet/in.h>
 #include <poll.h>
 #include <unistd.h>
@@ -30,14 +31,14 @@
 class Server
 {
 private:
-	static const std::string	_ip; // usually 127.0.0.1
-	int	_port;
-	std::string _password;
-	int	_socket_fd; // server's socket fd
+	static const std::string	_ip;			// usually 127.0.0.1
+	int							_port;
+	std::string 				_password;
+	int							_socket_fd;		// server's socket fd
 
-	Commands	command_handler;
-	std::map<std::string, Channel>	_channels; // each channel is mapped by their name
-	std::map<int, Client>	_clients; // each client is mapped by it's socket fd
+	Commands						command_handler;
+	std::map<std::string, Channel>	_channels;		// each channel is mapped by their name
+	std::map<int, Client>			_clients;		// each client is mapped by it's socket fd
 public:
 	Server(std::string ip, int port, std::string password);
 	~Server();
