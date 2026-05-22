@@ -49,6 +49,11 @@ public:
 	Channel& operator=(const Channel &other);
 	~Channel();
 
+	std::string getName() const;
+	// bool	getInvited() const;
+
+
+
 	void	joinChannel(Client* new_user, std::string password = "");
 	void	partChannel(Client* user_delete);
 

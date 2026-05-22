@@ -12,6 +12,63 @@
 
 #include "includes/Channel.hpp"
 
+void sendReply(int Clientfd, const std::string& server, const std::string& code, 
+	const std::string& target, const std::string& params, const std::string& trailing) 
+{
+	std::string msg = ":" + server + " " + code + " " + target + " " + params + " :" + trailing + "\r\n";
+	send(Clientfd, msg.c_str(), msg.size(), 0);
+}
+
+void Channel::joinChannel(Client *new_user, std::string password) {
+	if (_password_active && _password != password)
+	{
+		sendReply(new_user->get_fd(), "irc.server", "475", new_user->getNickname(), _channel_name, "Cannot join channel +k");
+		return ; 
+	}
+	if (_invite_active && !_invited.count(new_user->getNickname()))
+	{
+		sendReply(new_user->get_fd(), "irc.server", "473", new_user->getNickname(), _channel_name, "Cannot join channel +i");
+		return ;
+	}
+	if (_user_limit_active && _users.size() > _user_limit)
+	{
+		sendReply(new_user->get_fd(), "irc.server", "471", new_user->getNickname(), _channel_name, "Cannot join channel +l");
+		return ;
+	}
+	_users.insert(new_user);
+	
+	// send join message to each client
+	std::string join_msg = ":" + new_user->getNickname() + "@" + new_user->get_ip() + " joined :" + _channel_name + "\r\n";
+	for (std::set<Client*>::iterator it = _users.begin(); it != _users.end(); it++)
+		send((*it)->get_fd(), join_msg.c_str(), join_msg.size(), 0);
+	
+	// if topic message is set
+	if (_topic_active && !_topic.empty())
+		sendReply(new_user->get_fd(), "irc.server", "332",new_user->getNickname(), _channel_name, _topic);
+	else
+		sendReply(new_user->get_fd(), "irc.server", "331",new_user->getNickname(), _channel_name, "No topic is set");
+	// send name list to new user
+	std::string names = "";
+	for (std::set<Client*>::iterator it = _users.begin(); it != _users.end(); it++) {
+		if (_operators.count(*it))
+			names += "@";
+		names += (*it)->getNickname() + " ";
+	}
+	sendReply(new_user->get_fd(), "irc.server", "353", new_user->getNickname(), _channel_name, names);
+	sendReply(new_user->get_fd(), "irc.server", "366", new_user->getNickname(), _channel_name, "End of /NAMES list");
+}
+
+void Channel::partChannel(Client *user_delete) {
+	if (_operators.count(user_delete))
+		_operators.erase(user_delete);
+	_users.erase(user_delete);
+	
+}
+
+std::string Channel::getName() const {
+	return (this->_channel_name);
+}
+
 Channel::Channel(){}
 
 Channel::Channel(const Channel& other) {
@@ -50,31 +107,3 @@ Channel& Channel::operator=(const Channel& other) {
 }
 
 Channel::~Channel() {}
-
-void Channel::joinChannel(Client *new_user, std::string password) {
-	if (_invite_active)
-	{
-		if (_invited.count(new_user->getNickname())) 
-		{
-			_users.insert(new_user);
-			std::cout << new_user << " has joined the channel " << this->_channel_name << std::endl;
-			return ;
-		}
-		std::cout << new_user << " wasn't invited to join the channel " << this->_channel_name << std::endl;
-		return ;
-	}
-	if (_password_active && _password != password)
-	{
-		std::cout << "Wrong password, access denied" << std::endl;
-		return ; 
-	}
-	_users.insert(new_user);
-	std::cout << new_user << " has joined the channel " << this->_channel_name << std::endl;
-}
-
-void Channel::partChannel(Client *user_delete) {
-	if (_operators.count(user_delete))
-		_operators.erase(user_delete);
-	_users.erase(user_delete);
-		
-}
