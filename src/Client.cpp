@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:06 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/21 21:12:59 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/05/22 16:37:17 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,10 @@ Client::~Client()
 {
 	// add here destroy_client function (it has to delete also from Channel's)
 }
+
+// void	receiveIncomingMessage()
+// {
+// }
 
 int	Client::getClientFd()
 {

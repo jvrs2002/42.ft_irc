@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/21 21:19:24 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/05/23 02:15:00 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,15 +46,15 @@ void	Server::initServer()
 	status = getaddrinfo(NULL, _port.c_str(), &hints, &serv_info);
 
 	if (status != 0){
-		std::cerr << "getaddrinfo error: " << gai_strerror(status) << std::endl;
+		std::cerr << "getaddrinfo() error." << std::endl;
 		exit(EXIT_FAILURE);
 	}
 
 	_socket_fd = socket(serv_info->ai_family, serv_info->ai_socktype, serv_info->ai_protocol);
 
 	if (_socket_fd == -1) {
+		std::cerr << "socket() error." << std::endl;
 		freeaddrinfo(serv_info);
-		std::cerr << "Socket creation error: " << strerror(errno) << std::endl;
 		exit(EXIT_FAILURE);
 	}
 
@@ -62,17 +62,17 @@ void	Server::initServer()
 	status = setsockopt(_socket_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof yes);
 
 	if (status == -1){
+		std::cerr << "setsockopt() error." << std::endl;
 		freeaddrinfo(serv_info);
-		std::cerr << "setsockopt() error: " << strerror(errno) << std::endl;
 		exit(EXIT_FAILURE);
 	}
 	
 	status = bind(_socket_fd, serv_info->ai_addr, serv_info->ai_addrlen);
-	
+
 	if (status == -1)
 	{
+		std::cerr << "bind() error." << std::endl;
 		freeaddrinfo(serv_info);
-		std::cerr << "Socket bind error: " << strerror(errno) << std::endl;
 		exit(EXIT_FAILURE);
 	}
 
@@ -81,14 +81,39 @@ void	Server::initServer()
 
 	if (status == -1)
 	{
-		std::cerr << "listen() error: " << strerror(errno) << std::endl;
+		std::cerr << "listen() error." << std::endl;
 		exit(EXIT_FAILURE);
 	}
 }
 
-/* Client*	Server::create_user(const std::string& ip, std::string port, int fd)
+// Helper function to get the socket address (IPv4 or IPv6)
+static void *get_in_addr(struct sockaddr *sa)
 {
-} */
+	if (sa->sa_family == AF_INET) {
+		return &(((struct sockaddr_in*)sa)->sin_addr);
+	}
+
+	return &(((struct sockaddr_in6*)sa)->sin6_addr);
+}
+
+void	Server::acceptClient()
+{
+	struct sockaddr_storage	new_client_addr;
+	socklen_t				sin_size = sizeof new_client_addr;
+	char					s[INET6_ADDRSTRLEN];
+
+	int	new_client_fd = accept(_socket_fd, (struct sockaddr *)&new_client_addr, &sin_size);
+
+	if (new_client_fd == -1)
+		std::cerr << "new client error" << std::endl;
+	
+	inet_ntop(new_client_addr.ss_family, get_in_addr((struct sockaddr *)&new_client_addr), s, sizeof s);
+}
+
+void	Server::addClient(const std::string& ip, std::string port, std::string buffer, int client_fd)
+{	
+	Client	new_client(ip, port, buffer, client_fd);
+}
 
 /* void	Server::delete_user(Client *user)
 {

@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:25 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/21 21:18:21 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/05/22 22:04:49 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 #include <poll.h>
 #include <string.h>
 #include <unistd.h>
+#include <arpa/inet.h>
 #include <fcntl.h>
 #include <cstdlib>
 #include "Channel.hpp"
@@ -40,9 +41,9 @@ private:
 	std::string					_password;
 	int							_socket_fd;			// server's socket fd
 
-	// Commands						command_handler;
-	// std::map<std::string, Channel>	_channels;		// each channel is mapped by their name
-	// std::map<int, Client>			_clients;		// each client is mapped by it's socket fd
+	Commands						command_handler;
+	std::map<std::string, Channel>	_channels;		// each channel is mapped by their name
+	std::map<int, Client>			_clients;		// each client is mapped by it's socket fd
 
 	const int _BACKLOG;
 public:
@@ -51,9 +52,10 @@ public:
 	Server(std::string ip, std::string port, std::string password);
 	~Server();
 
-	void		initServer();
-	// Client*		create_user(int fd, const std::string& ip, std::string port);
-	// void		delete_user(Client *user);
+	void	initServer();
+	void	acceptClient();
+	void	addClient(const std::string& ip, std::string port, std::string buffer, int client_fd);
+	// void		deleteClient(Client *user);
 };
 
 #endif
