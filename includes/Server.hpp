@@ -18,27 +18,38 @@
 #include <map>
 #include <string>
 #include <sys/socket.h>
+#include <sys/types.h>
+#include <netdb.h>
 #include <netinet/in.h>
 #include <poll.h>
+#include <string.h>
 #include <unistd.h>
+#include <arpa/inet.h>
 #include <fcntl.h>
+#include <cstdlib>
 #include "Channel.hpp"
 #include "Client.hpp"
 #include "Commands.hpp"
+#include <cerrno>
+#include <cstring>
 
 class Server
 {
 private:
-	std::string	_ip; // usually 0.0.0.0
-	int	_port;
-	std::string _password;
-	int	_socket_fd; // server's socket fd
+	const std::string			_ip;				// usually 127.0.0.1
+	std::string					_port;
+	std::string					_password;
+	int							_socket_fd;			// server's socket fd
 
-	Commands	command_handler;
-	std::map<std::string, Channel>	_channels; // each channel is mapped by their name
-	std::map<int, Client>	_clients; // each client is mapped by it's socket fd
+	Commands						command_handler;
+	std::map<std::string, Channel>	_channels;		// each channel is mapped by their name
+	std::map<int, Client>			_clients;		// each client is mapped by it's socket fd
+
+	const int _BACKLOG;
 public:
-	Server(std::string ip, int port, std::string password);
+	const std::string NAME;
+
+	Server(std::string ip, std::string port, std::string password);
 	~Server();
 	void		init_server(std::string ip, int port, std::string password, int socket_fd);
 	Client*		create_user(int fd, const std::string& ip, int port);
