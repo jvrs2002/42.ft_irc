@@ -54,8 +54,8 @@ public:
 
 
 
-	void	joinChannel(Client* new_user, std::string password = "");
-	void	partChannel(Client* user_delete);
+	void	joinChannel(Client* new_user, std::string password);
+	void	partChannel(Client* user_delete, std::string reason);
 
 	
 };

@@ -19,6 +19,8 @@ static void sendReply(int Clientfd, const std::string& server, const std::string
 	send(Clientfd, msg.c_str(), msg.size(), 0);
 }
 
+static void broadcastReply(Client& user,) {}
+
 /* :nick!user@host JOIN :#channel
 :server 331 nick #channel :No topic is set
 :server 353 nick = #channel :@nick* 
@@ -44,7 +46,7 @@ void Channel::joinChannel(Client *new_user, std::string password)
 	_users.insert(new_user);
 	
 	// send join message to each client
-	std::string join_msg = ":" + new_user->getNickname() + "@" + new_user->get_ip() + " JOIN :" + _channel_name + "\r\n";
+	std::string join_msg = ":" + new_user->getNickname() + "!" + new_user->getUsername() + "@" + new_user->getIp() + " JOIN :" + _channel_name + "\r\n";
 	for (std::set<Client*>::iterator it = _users.begin(); it != _users.end(); it++)
 		send((*it)->getClientFd(), join_msg.c_str(), join_msg.size(), 0);
 	
@@ -64,7 +66,7 @@ void Channel::joinChannel(Client *new_user, std::string password)
 	sendReply(new_user->getClientFd(), SERVER_NAME, "366", new_user->getNickname(), _channel_name, "End of /NAMES list");
 }
 
-void Channel::partChannel(Client *user_delete) {
+void Channel::partChannel(Client *user_delete, std::string reason) {
 	if (_operators.count(user_delete))
 		_operators.erase(user_delete);
 	_users.erase(user_delete);

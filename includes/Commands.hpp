@@ -28,16 +28,16 @@
 class Commands
 {
 private:
-		static void join_handler(Message msg, Client user, std::map<int, Client>& client_map, std::map<std::string, Channel>& channel_map);		
-		static void nick_handler(Message msg, Client user, std::map<int, Client>& client_map, std::map<std::string, Channel>& channel_map);
+		static void join_handler(Message msg, Client* user, std::map<int, Client>& client_map, std::map<std::string, Channel>& channel_map);		
+		static void part_handler(Message msg, Client* user, std::map<int, Client>& client_map, std::map<std::string, Channel>& channel_map);
 		
-		typedef void (*PFnCommandHandler)(Message, Client, std::map<int, Client>&, std::map<std::string, Channel>&);
+		typedef void (*PFnCommandHandler)(Message, Client*, std::map<int, Client>&, std::map<std::string, Channel>&);
 		std::map<std::string, PFnCommandHandler> _handler;
 		
 public:
 		Commands();
 		~Commands();
-		void Commandhandler(Message msg, Client user, std::map<int, Client>& client_map, std::map<std::string, Channel>& channel_map);
+		void Commandhandler(Message msg, Client* user, std::map<int, Client>& client_map, std::map<std::string, Channel>& channel_map);
 };
 
 #endif
