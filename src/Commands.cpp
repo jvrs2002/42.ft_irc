@@ -16,6 +16,7 @@ Commands::Commands()
 {
 	_handler["JOIN"] = &join_handler;
 	_handler["PART"] = &part_handler;
+	_handler["PRIVMSG"] = &privmsg_handler;
 }
 
 Commands::~Commands()
@@ -35,7 +36,42 @@ static void sendReply(int Clientfd, const std::string& server, const std::string
 	send(Clientfd, msg.c_str(), msg.size(), 0);
 }
 
-void join_handler(Message msg, Client* user, std::map<int, Client>& client_map, std::map<std::string, Channel>& channel_map)
+static void privmsg_handler(Message msg, Client* user, std::map<int, Client>& client_map, std::map<std::string, Channel>& channel_map) 
+{
+	std::vector<std::string> params = msg.getParams();
+
+	if (params[0].empty())
+	{
+		sendReply(user->getClientFd(), SERVER_NAME, "411", user->getNickname(), "PRIVMSG", "No recipient given");
+		return ;
+	}
+	if (params[1].empty())
+	{
+		sendReply(user->getClientFd(), SERVER_NAME, "412", user->getNickname(), "", "No text to send");
+		return ;
+	}
+
+	std::string recipient = params[0];
+	std::string message = params[1];
+	if (!channel_map.count(recipient) && recipient[0] == '#' )
+	{
+		sendReply(user->getClientFd(), SERVER_NAME, "403", user->getNickname(), recipient, "No such channel");
+		return ;
+	}
+	if (!client_map.count(user->getClientFd()) && recipient[0] != '#')
+	{
+		sendReply(user->getClientFd(), SERVER_NAME, "401", user->getNickname(), recipient, "No such nick");
+		return ;
+	}
+	if (!channel_map[recipient].hasUser(user) && recipient[0] == '#')
+	{
+		sendReply(user->getClientFd(), SERVER_NAME, "404", user->getNickname(), recipient, "Cannot send to channel");
+		return ;
+	}
+
+}
+
+static void join_handler(Message msg, Client* user, std::map<int, Client>& client_map, std::map<std::string, Channel>& channel_map)
 {
 	std::vector<std::string> params = msg.getParams();
 
@@ -61,7 +97,7 @@ void join_handler(Message msg, Client* user, std::map<int, Client>& client_map, 
 	}
 }
 
-void part_handler(Message msg, Client* user, std::map<int, Client>& client_map, std::map<std::string, Channel>& channel_map) {
+static void part_handler(Message msg, Client* user, std::map<int, Client>& client_map, std::map<std::string, Channel>& channel_map) {
 	std::vector<std::string> params = msg.getParams();
 
 	if (params.empty())

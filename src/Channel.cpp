@@ -19,8 +19,6 @@ static void sendReply(int Clientfd, const std::string& server, const std::string
 	send(Clientfd, msg.c_str(), msg.size(), 0);
 }
 
-static void broadcastReply(Client& user,) {}
-
 /* :nick!user@host JOIN :#channel
 :server 331 nick #channel :No topic is set
 :server 353 nick = #channel :@nick* 
@@ -76,6 +74,15 @@ void Channel::partChannel(Client *user_delete, std::string reason) {
 		_operators.erase(user_delete);
 	_users.erase(user_delete);
 	
+}
+
+void Channel::ChannelMessage(Client *sender, std::string channel_name, std::string buffer) {
+	std::string msg = ":" + sender->getNickname() + "!" + sender->getUsername() + "@" + sender->getIp() + " PRIVMSG " + _channel_name + " :" + buffer + "\r\n";
+	for (std::set<Client*>::iterator it = _users.begin(); it != _users.end(); it++) {
+		if (sender->getClientFd() == (*it)->getClientFd())
+			continue ;
+		send((*it)->getClientFd(), msg.c_str(), msg.size(), 0);
+	}
 }
 
 std::string Channel::getName() const {

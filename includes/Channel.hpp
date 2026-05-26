@@ -56,6 +56,7 @@ public:
 
 	void	joinChannel(Client* new_user, std::string password);
 	void	partChannel(Client* user_delete, std::string reason);
+	void	ChannelMessage(Client* sender, std::string channel_name, std::string buffer);
 
 	
 };
