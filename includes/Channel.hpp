@@ -51,8 +51,8 @@ public:
 
 	std::string getName() const;
 	// bool	getInvited() const;
-
-
+	bool	hasUser(Client *user) const;
+	bool	emptyChannel() const;
 
 	void	joinChannel(Client* new_user, std::string password);
 	void	partChannel(Client* user_delete, std::string reason);

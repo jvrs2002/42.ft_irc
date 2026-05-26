@@ -55,8 +55,10 @@ void join_handler(Message msg, Client* user, std::map<int, Client>& client_map, 
 	}
 	if (channel_map.count(channel_name))
 		channel_map[channel_name].joinChannel(user, password);
-	else
+	else {
 		channel_map[channel_name] = Channel(channel_name, user);
+		channel_map[channel_name].joinChannel(user, password);
+	}
 }
 
 void part_handler(Message msg, Client* user, std::map<int, Client>& client_map, std::map<std::string, Channel>& channel_map) {
@@ -68,6 +70,21 @@ void part_handler(Message msg, Client* user, std::map<int, Client>& client_map, 
 		return ;
 	}
 	std::string channel_name = params[0];
+	std::string reason = (params.size() > 1) ? params [1] : "Leaving";
 	
+	if (!channel_map.count(channel_name))
+	{
+		sendReply(user->getClientFd(), SERVER_NAME, "403", user->getNickname(), channel_name, "No such channel");
+		return ;
+	}
+	if (!channel_map[channel_name].hasUser(user))
+	{
+		sendReply(user->getClientFd(), SERVER_NAME, "442", user->getNickname(), channel_name, "You're not on that channel");
+		return ;
+	}
+
+	channel_map[channel_name].partChannel(user, reason);
+	if (channel_map[channel_name].emptyChannel())
+		channel_map.erase(channel_name);
 
 }

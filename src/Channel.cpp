@@ -67,6 +67,11 @@ void Channel::joinChannel(Client *new_user, std::string password)
 }
 
 void Channel::partChannel(Client *user_delete, std::string reason) {
+	
+	std::string part_msg = ":" + user_delete->getNickname() + "!" + user_delete->getUsername() + "@" + user_delete->getIp() + " PART " + _channel_name + " :" + reason + "\r\n";
+	for (std::set<Client*>::iterator it = _users.begin(); it != _users.end(); it++)
+		send((*it)->getClientFd(), part_msg.c_str(), part_msg.size(), 0);
+
 	if (_operators.count(user_delete))
 		_operators.erase(user_delete);
 	_users.erase(user_delete);
@@ -75,6 +80,14 @@ void Channel::partChannel(Client *user_delete, std::string reason) {
 
 std::string Channel::getName() const {
 	return (this->_channel_name);
+}
+
+bool	Channel::hasUser(Client *user) const {
+	return (_users.count(user));
+}
+
+bool	Channel::emptyChannel() const {
+	return (_users.empty());
 }
 
 Channel::Channel(){}
@@ -93,9 +106,7 @@ Channel::Channel(const std::string channel_name, Client* creator) :
 	_user_limit_active(false),
 	_user_limit(0)
 {
-	_users.insert(creator);
 	_operators.insert(creator);
-	std::cout << "New Channel " << channel_name << " created by " << creator->getNickname() << std::endl;
 }
 Channel& Channel::operator=(const Channel& other) {
 	if (this != &other) {
