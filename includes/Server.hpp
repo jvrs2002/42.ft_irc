@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:25 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/19 15:27:36 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/05/26 14:40:32 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,8 +42,8 @@ private:
 	int							_socket_fd;			// server's socket fd
 
 	Commands						command_handler;
-	std::map<std::string, Channel>	_channels;		// each channel is mapped by their name
-	std::map<int, Client>			_clients;		// each client is mapped by it's socket fd
+	std::map<std::string, Channel>	_channel_map;		// each channel is mapped by their name
+	std::map<int, Client>			_client_map;		// each client is mapped by it's socket fd
 
 	const int _BACKLOG;
 public:
@@ -51,9 +51,11 @@ public:
 
 	Server(std::string ip, std::string port, std::string password);
 	~Server();
-	void		init_server(std::string ip, int port, std::string password, int socket_fd);
-	Client*		create_user(int fd, const std::string& ip, int port);
-	void		delete_user(Client *user);
+
+	void	initServer();
+	void	acceptClient();
+	void	addClient(const std::string& ip, std::string port, int client_fd);
+	// void		deleteClient(Client *user);
 };
 
 #endif
