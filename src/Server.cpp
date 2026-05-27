@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/26 14:23:20 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/05/27 19:21:48 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,24 +86,10 @@ void	Server::initServer()
 	}
 }
 
-// Helper function to get the socket address (IPv4 or IPv6)
-static void *get_in_addr(struct sockaddr *sa)
-{
-	if (sa->sa_family == AF_INET) {
-		return &(((struct sockaddr_in*)sa)->sin_addr);
-	}
-
-	return &(((struct sockaddr_in6*)sa)->sin6_addr);
-}
-
-static void	*get_port_addr(struct sockaddr *sa)
-{
-	
-}
-
 void	Server::acceptClient()
 {
 	struct sockaddr_storage	client_addr;
+	std::string				client_port;
 	socklen_t				sin_size = sizeof client_addr;
 	char					client_ip[INET6_ADDRSTRLEN];
 
@@ -112,9 +98,12 @@ void	Server::acceptClient()
 	if (client_fd == -1)
 		std::cerr << "new client error" << std::endl;
 	
-	inet_ntop(client_addr.ss_family, get_in_addr((struct sockaddr *)&client_addr), client_ip, sizeof client_ip);
-	std::cout << "server: got connection from" << client_ip << std::endl; // testing
-	addClient(client_ip, ntohs());
+	inet_ntop(client_addr.ss_family, utils_get_in_addr((struct sockaddr *)&client_addr), client_ip, sizeof client_ip);
+	client_port = utils_get_port_str((struct sockaddr *)&client_addr);
+
+	std::cout << "server: got connection from IP " << client_ip << "using PORT "<< client_port << std::endl; // testing
+
+	addClient(client_ip, client_port, client_fd);
 }
 
 void	Server::addClient(const std::string& ip, std::string port, int client_fd)
@@ -125,7 +114,7 @@ void	Server::addClient(const std::string& ip, std::string port, int client_fd)
 	if (new_client.parse(buffer) != -1)
 		_clients[client_fd] = new_client;
 
-
+	
 }
 
 /* void	Server::delete_user(Client *user)

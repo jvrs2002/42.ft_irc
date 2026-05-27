@@ -6,32 +6,34 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:25 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/26 14:40:32 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/05/27 19:08:02 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_HPP
-#define SERVER_HPP
+# define SERVER_HPP
 
-#include <iostream>
-#include <vector>
-#include <map>
-#include <string>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <poll.h>
-#include <string.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <fcntl.h>
-#include <cstdlib>
-#include "Channel.hpp"
-#include "Client.hpp"
-#include "Commands.hpp"
-#include <cerrno>
-#include <cstring>
+# include <iostream>
+# include <vector>
+# include <map>
+# include <string>
+# include <sys/socket.h>
+# include <sys/types.h>
+# include <netdb.h>
+# include <netinet/in.h>
+# include <poll.h>
+# include <string.h>
+# include <unistd.h>
+# include <arpa/inet.h>
+# include <fcntl.h>
+# include <cstdlib>
+# include "Channel.hpp"
+# include "Client.hpp"
+# include "Commands.hpp"
+# include "Message.hpp"
+# include "Utils.hpp"
+# include <cerrno>
+# include <cstring>
 
 class Server
 {
