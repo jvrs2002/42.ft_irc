@@ -6,7 +6,7 @@
 /*   By: ppassos <ppassos@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:20 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/28 18:11:58 by ppassos          ###   ########.fr       */
+/*   Updated: 2026/05/28 18:31:07 by ppassos          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ Message::Message()
 {
 	this->command = "";
 	this->prefix = "";
-	this->params = {};
+	this->params = std::vector<std::string>();
 }
 
 Message::~Message(){}
@@ -144,7 +144,7 @@ std::string Message::Fillcommand(std::string line)
 }
 void Message::FillMessage(std::string buffer, std::string ip, int len)
 {
-	size_t start = buffer.find_first_not_of(' ');
+	size_t start = buffer.find_first_not_of(" \t");
 	buffer = buffer.substr(start);
 	if (len == 2 ){
 		std::cout << std::endl;
