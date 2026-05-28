@@ -6,11 +6,12 @@
 /*   By: manelcarvalho <manelcarvalho@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:11 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/15 16:55:24 by manelcarval      ###   ########.fr       */
+/*   Updated: 2026/05/28 11:41:15 by manelcarval      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "includes/Commands.hpp"
+#include "Commands.hpp"
+#include "Utils.hpp"
 
 Commands::Commands()
 {
@@ -29,14 +30,14 @@ void Commands::Commandhandler(Message msg, Client* user, std::map<int, Client>& 
 	_handler[msg.getCommand()] (msg, user, client_map, channel_map);
 }
 
-static void sendReply(int Clientfd, const std::string& server, const std::string& code, 
-	const std::string& target, const std::string& params, const std::string& trailing) 
-{
-	std::string msg = ":" + server + " " + code + " " + target + " " + params + " :" + trailing + "\r\n";
-	send(Clientfd, msg.c_str(), msg.size(), 0);
-}
+// static void sendReply(int Clientfd, const std::string& server, const std::string& code, 
+// 	const std::string& target, const std::string& params, const std::string& trailing) 
+// {
+// 	std::string msg = ":" + server + " " + code + " " + target + " " + params + " :" + trailing + "\r\n";
+// 	send(Clientfd, msg.c_str(), msg.size(), 0);
+// }
 
-static void privmsg_handler(Message msg, Client* user, std::map<int, Client>& client_map, std::map<std::string, Channel>& channel_map) 
+void Commands::privmsg_handler(Message msg, Client* user, std::map<int, Client>& client_map, std::map<std::string, Channel>& channel_map) 
 {
 	std::vector<std::string> params = msg.getParams();
 
@@ -51,27 +52,31 @@ static void privmsg_handler(Message msg, Client* user, std::map<int, Client>& cl
 		return ;
 	}
 
-	std::string recipient = params[0];
+	std::string target = params[0];
 	std::string message = params[1];
-	if (!channel_map.count(recipient) && recipient[0] == '#' )
+	if (!channel_map.count(target) && target[0] == '#' )
 	{
-		sendReply(user->getClientFd(), SERVER_NAME, "403", user->getNickname(), recipient, "No such channel");
+		sendReply(user->getClientFd(), SERVER_NAME, "403", user->getNickname(), target, "No such channel");
 		return ;
 	}
-	if (!client_map.count(user->getClientFd()) && recipient[0] != '#')
+	if (!client_map.count(user->getClientFd()) && target[0] != '#')
 	{
-		sendReply(user->getClientFd(), SERVER_NAME, "401", user->getNickname(), recipient, "No such nick");
+		sendReply(user->getClientFd(), SERVER_NAME, "401", user->getNickname(), target, "No such nick");
 		return ;
 	}
-	if (!channel_map[recipient].hasUser(user) && recipient[0] == '#')
+	if (!channel_map[target].hasUser(user) && target[0] == '#')
 	{
-		sendReply(user->getClientFd(), SERVER_NAME, "404", user->getNickname(), recipient, "Cannot send to channel");
+		sendReply(user->getClientFd(), SERVER_NAME, "404", user->getNickname(), target, "Cannot send to channel");
 		return ;
 	}
+	if (target[0] == '#')
+		channel_map[target].ChannelMessage(msg.getPrefix(), user, message);
+	else
+		client_map[].
 
 }
 
-static void join_handler(Message msg, Client* user, std::map<int, Client>& client_map, std::map<std::string, Channel>& channel_map)
+void Commands::join_handler(Message msg, Client* user, std::map<int, Client>& client_map, std::map<std::string, Channel>& channel_map)
 {
 	std::vector<std::string> params = msg.getParams();
 
@@ -84,7 +89,7 @@ static void join_handler(Message msg, Client* user, std::map<int, Client>& clien
 	std::string channel_name = params[0];
 	std::string password = (params.size() > 1) ? params[1] : "";
 
-	if (channel_name.empty() || channel_name[0] != '#')
+	if (channel_name.size() <= 1 || channel_name[0] != '#')
 	{
 		sendReply(user->getClientFd(), SERVER_NAME, "403", user->getNickname(), channel_name, "No such channel");
 		return ;
@@ -97,7 +102,7 @@ static void join_handler(Message msg, Client* user, std::map<int, Client>& clien
 	}
 }
 
-static void part_handler(Message msg, Client* user, std::map<int, Client>& client_map, std::map<std::string, Channel>& channel_map) {
+void Commands::part_handler(Message msg, Client* user, std::map<int, Client>& client_map, std::map<std::string, Channel>& channel_map) {
 	std::vector<std::string> params = msg.getParams();
 
 	if (params.empty())

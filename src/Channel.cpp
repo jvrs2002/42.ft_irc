@@ -6,25 +6,26 @@
 /*   By: manelcarvalho <manelcarvalho@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:51 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/22 15:28:38 by manelcarval      ###   ########.fr       */
+/*   Updated: 2026/05/28 11:28:12 by manelcarval      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "includes/Channel.hpp"
+#include "Channel.hpp"
+#include "Utils.hpp"
 
-static void sendReply(int Clientfd, const std::string& server, const std::string& code, 
-	const std::string& target, const std::string& params, const std::string& trailing) 
-{
-	std::string msg = ":" + server + " " + code + " " + target + " " + params + " :" + trailing + "\r\n";
-	send(Clientfd, msg.c_str(), msg.size(), 0);
-}
+// static void sendReply(int Clientfd, const std::string& server, const std::string& code, 
+// 	const std::string& target, const std::string& params, const std::string& trailing) 
+// {
+// 	std::string msg = ":" + server + " " + code + " " + target + " " + params + " :" + trailing + "\r\n";
+// 	send(Clientfd, msg.c_str(), msg.size(), 0);
+// }
 
 /* :nick!user@host JOIN :#channel
 :server 331 nick #channel :No topic is set
 :server 353 nick = #channel :@nick* 
 :server 366 nick #channel :End of /NAMES list */
 
-void Channel::joinChannel(Client *new_user, std::string password) 
+void Channel::joinChannel(std::string prefix, Client *new_user, std::string password) 
 {
 	if (_password_active && _password != password)
 	{
@@ -44,7 +45,7 @@ void Channel::joinChannel(Client *new_user, std::string password)
 	_users.insert(new_user);
 	
 	// send join message to each client
-	std::string join_msg = ":" + new_user->getNickname() + "!" + new_user->getUsername() + "@" + new_user->getIp() + " JOIN :" + _channel_name + "\r\n";
+	std::string join_msg = prefix + " JOIN :" + _channel_name + "\r\n";
 	for (std::set<Client*>::iterator it = _users.begin(); it != _users.end(); it++)
 		send((*it)->getClientFd(), join_msg.c_str(), join_msg.size(), 0);
 	
@@ -64,9 +65,9 @@ void Channel::joinChannel(Client *new_user, std::string password)
 	sendReply(new_user->getClientFd(), SERVER_NAME, "366", new_user->getNickname(), _channel_name, "End of /NAMES list");
 }
 
-void Channel::partChannel(Client *user_delete, std::string reason) {
+void Channel::partChannel(std::string prefix, Client *user_delete, std::string reason) {
 	
-	std::string part_msg = ":" + user_delete->getNickname() + "!" + user_delete->getUsername() + "@" + user_delete->getIp() + " PART " + _channel_name + " :" + reason + "\r\n";
+	std::string part_msg = prefix + " PART " + _channel_name + " :" + reason + "\r\n";
 	for (std::set<Client*>::iterator it = _users.begin(); it != _users.end(); it++)
 		send((*it)->getClientFd(), part_msg.c_str(), part_msg.size(), 0);
 
@@ -76,8 +77,8 @@ void Channel::partChannel(Client *user_delete, std::string reason) {
 	
 }
 
-void Channel::ChannelMessage(Client *sender, std::string channel_name, std::string buffer) {
-	std::string msg = ":" + sender->getNickname() + "!" + sender->getUsername() + "@" + sender->getIp() + " PRIVMSG " + _channel_name + " :" + buffer + "\r\n";
+void Channel::ChannelMessage(std::string prefix, Client *sender, std::string buffer) {
+	std::string msg = prefix + " PRIVMSG " + _channel_name + " :" + buffer + "\r\n";
 	for (std::set<Client*>::iterator it = _users.begin(); it != _users.end(); it++) {
 		if (sender->getClientFd() == (*it)->getClientFd())
 			continue ;

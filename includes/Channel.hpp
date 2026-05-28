@@ -6,7 +6,7 @@
 /*   By: manelcarvalho <manelcarvalho@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:03 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/22 15:04:36 by manelcarval      ###   ########.fr       */
+/*   Updated: 2026/05/28 09:43:32 by manelcarval      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,9 +54,9 @@ public:
 	bool	hasUser(Client *user) const;
 	bool	emptyChannel() const;
 
-	void	joinChannel(Client* new_user, std::string password);
-	void	partChannel(Client* user_delete, std::string reason);
-	void	ChannelMessage(Client* sender, std::string channel_name, std::string buffer);
+	void	joinChannel(std::string prefix, Client* new_user, std::string password);
+	void	partChannel(std::string prefix, Client* user_delete, std::string reason);
+	void	ChannelMessage(std::string prefix, Client* sender, std::string buffer);
 
 	
 };

@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/23 02:15:00 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/05/27 19:21:48 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,33 +86,35 @@ void	Server::initServer()
 	}
 }
 
-// Helper function to get the socket address (IPv4 or IPv6)
-static void *get_in_addr(struct sockaddr *sa)
-{
-	if (sa->sa_family == AF_INET) {
-		return &(((struct sockaddr_in*)sa)->sin_addr);
-	}
-
-	return &(((struct sockaddr_in6*)sa)->sin6_addr);
-}
-
 void	Server::acceptClient()
 {
-	struct sockaddr_storage	new_client_addr;
-	socklen_t				sin_size = sizeof new_client_addr;
-	char					s[INET6_ADDRSTRLEN];
+	struct sockaddr_storage	client_addr;
+	std::string				client_port;
+	socklen_t				sin_size = sizeof client_addr;
+	char					client_ip[INET6_ADDRSTRLEN];
 
-	int	new_client_fd = accept(_socket_fd, (struct sockaddr *)&new_client_addr, &sin_size);
+	int	client_fd = accept(_socket_fd, (struct sockaddr *)&client_addr, &sin_size);
 
-	if (new_client_fd == -1)
+	if (client_fd == -1)
 		std::cerr << "new client error" << std::endl;
 	
-	inet_ntop(new_client_addr.ss_family, get_in_addr((struct sockaddr *)&new_client_addr), s, sizeof s);
+	inet_ntop(client_addr.ss_family, utils_get_in_addr((struct sockaddr *)&client_addr), client_ip, sizeof client_ip);
+	client_port = utils_get_port_str((struct sockaddr *)&client_addr);
+
+	std::cout << "server: got connection from IP " << client_ip << "using PORT "<< client_port << std::endl; // testing
+
+	addClient(client_ip, client_port, client_fd);
 }
 
-void	Server::addClient(const std::string& ip, std::string port, std::string buffer, int client_fd)
+void	Server::addClient(const std::string& ip, std::string port, int client_fd)
 {	
-	Client	new_client(ip, port, buffer, client_fd);
+	Client	new_client(ip, port, client_fd);
+	buffer = recv();
+	
+	if (new_client.parse(buffer) != -1)
+		_clients[client_fd] = new_client;
+
+	
 }
 
 /* void	Server::delete_user(Client *user)
