@@ -6,7 +6,7 @@
 /*   By: ppassos <ppassos@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:20 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/20 17:10:13 by ppassos          ###   ########.fr       */
+/*   Updated: 2026/05/28 18:11:58 by ppassos          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,20 +102,29 @@ std::string Message::getPrefix() const
 {
 	return(this->prefix);
 }
+bool isSpace(char c)
+{
+	return (c == ' ' || c == '\t');
+}
 std::vector<std::string> Message::Fillparams(std::string line)
 {
-	size_t space = line.find(' ');
-	std::string rest = line.substr(space + 1);
 	std::vector<std::string> params;
-
+	size_t space = line.find_first_of(" \t");
+	if (space == std::string::npos)
+        return params;
+	std::string rest = line.substr(space + 1);
 	while (!rest.empty())
 	{
+		while (!rest.empty() && isSpace(rest[0]))
+            rest.erase(0, 1);
+        if (rest.empty())
+            break;
 		if (rest[0] == ':')
 		{
 			params.push_back(rest.substr(1));
 			break ;
 		}
-		size_t pos = rest.find(' ');
+		size_t pos = rest.find_first_of(" \t");
 		if (pos == std::string::npos)
 		{
 			params.push_back(rest);
@@ -129,14 +138,20 @@ std::vector<std::string> Message::Fillparams(std::string line)
 
 std::string Message::Fillcommand(std::string line)
 {
-	size_t space = line.find(' ');
+	size_t space = line.find_first_of(" \t");
 	std::string command = line.substr(0, space);
 	return (command);
 }
 void Message::FillMessage(std::string buffer, std::string ip, int len)
 {
-	if (len == 2){
-		std::cout <<"ERROR" << std::endl;
+	size_t start = buffer.find_first_not_of(' ');
+	buffer = buffer.substr(start);
+	if (len == 2 ){
+		std::cout << std::endl;
+		return ;
+	}
+	if (len > 511){
+		std:: cout << "417 ERR_INPUTTOOLONG" <<std::endl;
 		return ;
 	}
 	this->prefix = ip;
