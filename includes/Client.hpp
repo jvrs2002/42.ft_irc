@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:08 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/26 14:00:02 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/05/29 14:17:34 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ private:
 	std::set<Channel*> _channels; // stores channels pointers, maximum 10 channels per user
 
 	std::string	_ip;
-	int	_port;
+	std::string	_port;
 
 	int	_socket_fd; // client's socket fd
 
@@ -46,7 +46,8 @@ private:
 public:
 	Client(std::string ip, std::string port, int fd);
 	~Client();
-	int	getClientFd();
+	int			getClientFd();
+	std::string	getNickname();
 };
 
 #endif
