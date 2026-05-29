@@ -1,15 +1,15 @@
 NAME = ircserv
 C++ = c++
-C++_FLAGS = -Wall -Wextra -Werror -std=c++98
+C++_FLAGS = -Wall -Wextra -Werror -std=c++98 -Iincludes
 
-FILES = main.cpp \
-		Channel.cpp \
-		Client.cpp \
-		Commands.cpp \
-		Message.cpp \
-		Server.cpp \
-		Socket.cpp \
-		Utils.cpp
+FILES = src/main.cpp \
+		src/Channel.cpp \
+		src/Client.cpp \
+		src/Commands.cpp \
+		src/Message.cpp \
+		src/Server.cpp \
+		src/Socket.cpp \
+		src/Utils.cpp
 
 OBJFILES = $(FILES:.cpp=.o)
 
