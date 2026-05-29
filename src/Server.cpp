@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/27 19:21:48 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/05/29 12:34:19 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,6 +108,9 @@ void	Server::acceptClient()
 
 void	Server::addClient(const std::string& ip, std::string port, int client_fd)
 {	
+	if (ip.empty() || port.empty() || !client_fd || client_fd == -1)
+		return ;
+
 	Client	new_client(ip, port, client_fd);
 	buffer = recv();
 	
@@ -115,6 +118,41 @@ void	Server::addClient(const std::string& ip, std::string port, int client_fd)
 		_clients[client_fd] = new_client;
 
 	
+}
+
+int	Server::getFd(std::string nickname)
+{
+	if (nickname.empty())
+		return (-1);
+	
+	for (std::map<int, Client>::iterator it = _client_map.begin(); it < _client_map.end(); it++) {
+		if (_client_map[it].getNickname() == nickname)
+			return _client_map[it].getClientFd();
+	}
+
+	return (-1);
+}
+
+Channel	Server::getChannel(std::string channel)
+{
+	if (channel.empty() || !_channel_map.count(channel))
+		return ;
+
+	return _channel_map[channel];
+}
+
+bool	Server::deleteChannel(std::string channel_name)
+{
+	if (channel_name.empty() || !_channel_map.count(channel_name))
+		return false;
+	
+	Channel channel = _channel_map[channel_name];
+	
+	if (!_channel_map[channel_name].hasUser())
+		return false;
+	
+	_channel_map.erase(channel_name);
+	return true;
 }
 
 /* void	Server::delete_user(Client *user)

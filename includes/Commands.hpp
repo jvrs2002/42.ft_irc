@@ -25,21 +25,23 @@
 #include "Message.hpp"
 #include "Client.hpp"
 
+#define CHANNEL '#'
+
 class Commands
 {
 private:
-		static void join_handler(Message msg, Client* user, std::map<int, Client>& client_map, std::map<std::string, Channel>& channel_map);		
-		static void part_handler(Message msg, Client* user, std::map<int, Client>& client_map, std::map<std::string, Channel>& channel_map);
-		static void privmsg_handler(Message msg, Client* user, std::map<int, Client>& client_map, std::map<std::string, Channel>& channel_map);		
+		static void join_handler(Message msg, Client* user, Server* server);		
+		static void part_handler(Message msg, Client* user, Server* server);
+		static void privmsg_handler(Message msg, Client* user, Server* server);		
 
 		
-		typedef void (*PFnCommandHandler)(Message, Client*, std::map<int, Client>&, std::map<std::string, Channel>&);
+		typedef void (*PFnCommandHandler)(Message, Client*, Server*);
 		std::map<std::string, PFnCommandHandler> _handler;
 		
 public:
 		Commands();
 		~Commands();
-		void Commandhandler(Message msg, Client* user, std::map<int, Client>& client_map, std::map<std::string, Channel>& channel_map);
+		void Commandhandler(Message msg, Client* user, Server* server);
 };
 
 #endif
