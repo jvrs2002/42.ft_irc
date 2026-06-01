@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:08 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/29 22:21:05 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/01 10:04:36 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,10 @@ public:
 	~Client();
 	bool		receiveBuffer();
 	int			getClientFd() const;
+	std::string	getUsername() const;
 	std::string	getNickname() const;
+	std::string	getRealName() const;
+
 };
 
 #endif

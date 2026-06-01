@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:06 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/29 22:25:41 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/01 10:13:43 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,19 +22,22 @@ Client::Client(std::string ip, std::string port, int fd) :
 	_registered(false),
 	_buffer()
 {
-	// connectClient();
-	// add here new_client_handler function
 }
 
 Client::~Client()
 {
-	// add here destroy_client function (it has to delete also from Channel's)
+	if (_socket_fd != -1)
+		close(_socket_fd);
+	
+	_buffer.clear();
 }
 
 /*	(RFC 2812) IRC messages are always lines of characters terminated with a CR-LF (\r\n)
 	pair, and these messages SHALL NOT exceed 512 characters in length, counting
 	all characters including the trailing CR-LF. Thus, there are 510 characters 
-	maximum allowed for the command and its parameters.*/
+	maximum allowed for the command and its parameters.
+	
+	This function does not deal with incomplete buffers. */
 bool	Client::receiveBuffer()
 {
 	if (_socket_fd == -1)
@@ -51,6 +54,21 @@ bool	Client::receiveBuffer()
 	temp_buffer[bytes_received] = '\0';
 	_buffer.append(temp_buffer);
 	return true;
+}
+
+std::string	Client::getUsername() const
+{
+	return _username;
+}
+
+std::string	Client::getNickname() const
+{
+	return _nickname;
+}
+
+std::string	Client::getRealName() const
+{
+	return _realname;
 }
 
 int	Client::getClientFd() const
