@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/01 17:49:14 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/01 20:15:43 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,19 +106,16 @@ void	Server::acceptClient()
 	addClient(client_ip, client_port, client_fd);
 }
 
-/* void	Server::addClient(const std::string& ip, std::string port, int client_fd)
+void	Server::addClient(const std::string& ip, std::string port, int client_fd)
 {	
 	if (ip.empty() || port.empty() || !client_fd || client_fd == -1)
 		return ;
 
 	Client	new_client(ip, port, client_fd);
-	new_client.receiveBuffer();
-
-	if (new_client.parse(buffer) != -1)
-		_clients[client_fd] = new_client;
-
+	_client_map[client_fd] = new_client;
 	
-} */
+	// add to poll() array
+}
 
 int	Server::getClientFd(std::string nickname) const
 {

@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:08 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/01 17:25:22 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/01 17:53:30 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,6 @@ public:
 	std::string	getUsername() const;
 	std::string	getNickname() const;
 	std::string	getRealName() const;
-
 };
 
 #endif
