@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/29 20:55:57 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/01 10:12:25 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ void	Server::initServer()
 	struct addrinfo	hints;
 	struct addrinfo	*serv_info;
 
-	memset(&hints, 0, sizeof (hints));
+	memset(&hints, 0, sizeof (hints)); // CHANGE THIS FUNCTION
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = AI_PASSIVE;
@@ -106,19 +106,19 @@ void	Server::acceptClient()
 	addClient(client_ip, client_port, client_fd);
 }
 
-/* void	Server::addClient(const std::string& ip, std::string port, int client_fd)
+void	Server::addClient(const std::string& ip, std::string port, int client_fd)
 {	
 	if (ip.empty() || port.empty() || !client_fd || client_fd == -1)
 		return ;
 
 	Client	new_client(ip, port, client_fd);
-	std::string	buffer = recv();
+	new_client.receiveBuffer();
 
 	if (new_client.parse(buffer) != -1)
 		_clients[client_fd] = new_client;
 
 	
-} */
+}
 
 int	Server::getClientFd(std::string nickname) const
 {
