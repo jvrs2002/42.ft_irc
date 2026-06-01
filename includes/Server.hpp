@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
+/*   By: manelcarvalho <manelcarvalho@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:25 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/29 12:34:33 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/01 10:29:20 by manelcarval      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,13 +54,15 @@ public:
 	Server(std::string ip, std::string port, std::string password);
 	~Server();
 
-	void	initServer();
-	void	acceptClient();
-	void	addClient(const std::string& ip, std::string port, int client_fd);
+	void		initServer();
+	void		acceptClient();
+	void		addClient(const std::string& ip, std::string port, int client_fd);
 	// void		deleteClient(Client *user);
-	int		getClientFd(std::string nickname);
-	Channel	getChannel(std::string channel);
-	bool	deleteChannel(std::string channel_name);
+	int			getClientFd(std::string nickname) const;
+	Channel*	getChannel(std::string channel);
+	bool		deleteChannel(std::string channel_name);
+	void		deleteUser(Client *user);
+
 
 };
 

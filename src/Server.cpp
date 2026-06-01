@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
+/*   By: manelcarvalho <manelcarvalho@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/29 12:34:19 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/01 10:29:39 by manelcarval      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,39 +106,39 @@ void	Server::acceptClient()
 	addClient(client_ip, client_port, client_fd);
 }
 
-void	Server::addClient(const std::string& ip, std::string port, int client_fd)
+/* void	Server::addClient(const std::string& ip, std::string port, int client_fd)
 {	
 	if (ip.empty() || port.empty() || !client_fd || client_fd == -1)
 		return ;
 
 	Client	new_client(ip, port, client_fd);
-	buffer = recv();
-	
+	std::string	buffer = recv();
+
 	if (new_client.parse(buffer) != -1)
 		_clients[client_fd] = new_client;
 
 	
-}
+} */
 
-int	Server::getFd(std::string nickname)
+int	Server::getClientFd(std::string nickname) const
 {
 	if (nickname.empty())
 		return (-1);
 	
-	for (std::map<int, Client>::iterator it = _client_map.begin(); it < _client_map.end(); it++) {
-		if (_client_map[it].getNickname() == nickname)
-			return _client_map[it].getClientFd();
+	for (std::map<int, Client>::const_iterator it = _client_map.begin(); it != _client_map.end(); ++it) {
+		if (it->second.getNickname() == nickname)
+			return it->first;
 	}
 
 	return (-1);
 }
 
-Channel	Server::getChannel(std::string channel)
+Channel*	Server::getChannel(std::string channel)
 {
 	if (channel.empty() || !_channel_map.count(channel))
-		return ;
+		return NULL;
 
-	return _channel_map[channel];
+	return &_channel_map[channel];
 }
 
 bool	Server::deleteChannel(std::string channel_name)
@@ -146,17 +146,15 @@ bool	Server::deleteChannel(std::string channel_name)
 	if (channel_name.empty() || !_channel_map.count(channel_name))
 		return false;
 	
-	Channel channel = _channel_map[channel_name];
-	
-	if (!_channel_map[channel_name].hasUser())
+	if (!_channel_map[channel_name].emptyChannel())
 		return false;
 	
 	_channel_map.erase(channel_name);
 	return true;
 }
 
-/* void	Server::delete_user(Client *user)
+void	Server::deleteUser(Client *user)
 {
-	_clients.erase(user->getClientFd());
+	_client_map.erase(user->getClientFd());
 	delete user;
-} */
+}
