@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:06 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/01 10:13:43 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/01 17:44:43 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,16 @@ bool	Client::receiveBuffer()
 	return true;
 }
 
+bool		Client::addToChannel(Channel* channel)
+{
+	if (!channel || channel->hasUser(this) || !_registered || _channels.size() >= 10)
+		return false;
+
+	_channels.insert(channel);
+	return true;
+}
+
+
 std::string	Client::getUsername() const
 {
 	return _username;
@@ -74,4 +84,14 @@ std::string	Client::getRealName() const
 int	Client::getClientFd() const
 {
 	return _socket_fd;
+}
+
+bool	Client::isAuthenticated() const
+{
+	return _authenticated;
+}
+
+bool	Client::isRegistered() const
+{
+	return _registered;
 }

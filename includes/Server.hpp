@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:25 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/29 20:55:15 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/01 17:22:19 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,9 +57,10 @@ public:
 	void		initServer();
 	void		acceptClient();
 	void		addClient(const std::string& ip, std::string port, int client_fd);
+	bool		createChannel(const std::string channel_name, Client *creator);
 	// void		deleteClient(Client *user);
 	int			getClientFd(std::string nickname) const;
-	Channel*	getChannel(std::string channel);
+	Channel*	getChannel(std::string channel_name);
 	bool		deleteChannel(std::string channel_name);
 	void		deleteUser(Client *user);
 
