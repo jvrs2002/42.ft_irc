@@ -6,7 +6,7 @@
 /*   By: manelcarvalho <manelcarvalho@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:11 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/28 11:41:15 by manelcarval      ###   ########.fr       */
+/*   Updated: 2026/06/01 15:07:15 by manelcarval      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@ Commands::Commands()
 	_handler["JOIN"] = &join_handler;
 	_handler["PART"] = &part_handler;
 	_handler["PRIVMSG"] = &privmsg_handler;
+	_handler["NOTICE"] = &notice_handler;
 }
 
 Commands::~Commands()
@@ -25,9 +26,9 @@ Commands::~Commands()
 
 }
 
-void Commands::Commandhandler(Message msg, Client* user, std::map<int, Client>& client_map, std::map<std::string, Channel>& channel_map) 
+void Commands::Commandhandler(Message msg, Client* user, Server* server) 
 {
-	_handler[msg.getCommand()] (msg, user, client_map, channel_map);
+	_handler[msg.getCommand()] (msg, user, server);
 }
 
 // static void sendReply(int Clientfd, const std::string& server, const std::string& code, 
@@ -37,95 +38,167 @@ void Commands::Commandhandler(Message msg, Client* user, std::map<int, Client>& 
 // 	send(Clientfd, msg.c_str(), msg.size(), 0);
 // }
 
-void Commands::privmsg_handler(Message msg, Client* user, std::map<int, Client>& client_map, std::map<std::string, Channel>& channel_map) 
+void Commands::join_handler(Message msg, Client* user, Server* server)
 {
 	std::vector<std::string> params = msg.getParams();
 
-	if (params[0].empty())
+	if (params.empty())
 	{
-		sendReply(user->getClientFd(), SERVER_NAME, "411", user->getNickname(), "PRIVMSG", "No recipient given");
+		sendReply(user->getClientFd(), server->NAME, "461", user->getNickname(), "JOIN", "Not enough parameters");
 		return ;
 	}
-	if (params[1].empty())
+
+	std::string channel_name = params[0];
+	Channel*	channel = server->getChannel(channel_name);
+	std::string password = (params.size() > 1) ? params[1] : "";
+
+	if (channel_name.size() <= 1 || channel_name[0] != '#')
 	{
-		sendReply(user->getClientFd(), SERVER_NAME, "412", user->getNickname(), "", "No text to send");
+		sendReply(user->getClientFd(), server->NAME, "403", user->getNickname(), channel_name, "No such channel");
+		return ;
+	}
+	if (channel != NULL) 
+	{
+		if (!user->addToChannel(channel))
+		{
+			sendReply(user->getClientFd(), server->NAME, "443", user->getNickname(), channel_name, "User is already in channel");
+			return ;
+		}
+		channel->joinChannel(msg.getPrefix(), user, password, server->NAME);
+	}
+	else {
+		if (!server->createChannel(channel_name, user))
+		{ 	//Correct error?
+			sendReply(user->getClientFd(), server->NAME, "403", user->getNickname(), channel_name, "No such channel");
+			return ;
+		}
+		channel = server->getChannel(channel_name);
+		if (!user->addToChannel(channel))
+		{	//Correct error?
+			sendReply(user->getClientFd(), server->NAME, "461", user->getNickname(), channel_name, "Error joining channel");
+			return ;
+		}
+		channel->joinChannel(msg.getPrefix(), user, password, server->NAME);
+	}
+}
+
+void Commands::part_handler(Message msg, Client* user, Server* server) 
+{
+	std::vector<std::string> params = msg.getParams();
+
+	if (params.empty())
+	{
+		sendReply(user->getClientFd(), server->NAME, "461", user->getNickname(), "PART", "Not enough parameters");
+		return ;
+	}
+	std::string channel_name = params[0];
+	Channel* channel = server->getChannel(channel_name);
+	std::string reason = (params.size() > 1) ? params [1] : "Leaving";
+	
+	if (channel == NULL)
+	{
+		sendReply(user->getClientFd(), server->NAME, "403", user->getNickname(), channel_name, "No such channel");
+		return ;
+	}
+	if (!channel->hasUser(user))
+	{
+		sendReply(user->getClientFd(), server->NAME, "442", user->getNickname(), channel_name, "You're not on that channel");
+		return ;
+	}
+
+	channel->partChannel(msg.getPrefix(), user, reason);
+	if (channel->emptyChannel())
+		server->deleteChannel(channel_name);
+}
+
+void Commands::privmsg_handler(Message msg, Client* user, Server* server) 
+{
+	std::vector<std::string> params = msg.getParams();
+	if (params.size() < 1)
+	{
+		sendReply(user->getClientFd(), server->NAME, "411", user->getNickname(), "PRIVMSG", "No recipient given");
+		return ;
+	}
+	if (params.size() < 2)
+	{
+		sendReply(user->getClientFd(), server->NAME, "412", user->getNickname(), "", "No text to send");
 		return ;
 	}
 
 	std::string target = params[0];
 	std::string message = params[1];
-	if (!channel_map.count(target) && target[0] == '#' )
+	if (target[0] == CHANNEL)
 	{
-		sendReply(user->getClientFd(), SERVER_NAME, "403", user->getNickname(), target, "No such channel");
-		return ;
+		Channel* channel = server->getChannel(target);
+		if (channel == NULL)
+		{
+			sendReply(user->getClientFd(), server->NAME, "403", user->getNickname(), target, "No such channel");
+			return ;
+		}
+		if (!channel->hasUser(user))
+		{	
+			sendReply(user->getClientFd(), server->NAME, "404", user->getNickname(), target, "Cannot send to channel");
+			return ;
+		}
+		channel->ChannelMessage(msg.getPrefix(), user, message);
 	}
-	if (!client_map.count(user->getClientFd()) && target[0] != '#')
-	{
-		sendReply(user->getClientFd(), SERVER_NAME, "401", user->getNickname(), target, "No such nick");
-		return ;
-	}
-	if (!channel_map[target].hasUser(user) && target[0] == '#')
-	{
-		sendReply(user->getClientFd(), SERVER_NAME, "404", user->getNickname(), target, "Cannot send to channel");
-		return ;
-	}
-	if (target[0] == '#')
-		channel_map[target].ChannelMessage(msg.getPrefix(), user, message);
 	else
-		client_map[].
+	{
+		int target_fd = server->getClientFd(target);
+		if (target_fd == -1)
+		{
+			sendReply(user->getClientFd(), server->NAME, "401", user->getNickname(), target, "No such nick");
+			return ;
+		}
+		std::string priv_msg = msg.getPrefix() + " PRIVMSG " + target + " :" + message + "\r\n";
+		send(target_fd, priv_msg.c_str(), priv_msg.size(), 0);
+	}
 
 }
 
-void Commands::join_handler(Message msg, Client* user, std::map<int, Client>& client_map, std::map<std::string, Channel>& channel_map)
+void Commands::notice_handler(Message msg, Client* user, Server* server) 
 {
 	std::vector<std::string> params = msg.getParams();
 
-	if (params.empty())
+	if (params.size() < 1)
 	{
-		sendReply(user->getClientFd(), SERVER_NAME, "461", user->getNickname(), "JOIN", "Not enough parameters");
+		sendReply(user->getClientFd(), server->NAME, "411", user->getNickname(), "NOTICE", "No recipient given");
+		return ;
+	}
+	if (params.size() < 2)
+	{
+		sendReply(user->getClientFd(), server->NAME, "412", user->getNickname(), "", "No text to send");
 		return ;
 	}
 
-	std::string channel_name = params[0];
-	std::string password = (params.size() > 1) ? params[1] : "";
-
-	if (channel_name.size() <= 1 || channel_name[0] != '#')
+	std::string target = params[0];
+	std::string message = params[1];
+	if (target[0] == CHANNEL)
 	{
-		sendReply(user->getClientFd(), SERVER_NAME, "403", user->getNickname(), channel_name, "No such channel");
-		return ;
+		Channel* channel = server->getChannel(target);
+		if (channel == NULL)
+		{
+			sendReply(user->getClientFd(), server->NAME, "403", user->getNickname(), target, "No such channel");
+			return ;
+		}
+		if (!channel->hasUser(user))
+		{	
+			sendReply(user->getClientFd(), server->NAME, "404", user->getNickname(), target, "Cannot send to channel");
+			return ;
+		}
+		channel->ChannelMessage(msg.getPrefix(), user, message);
 	}
-	if (channel_map.count(channel_name))
-		channel_map[channel_name].joinChannel(user, password);
-	else {
-		channel_map[channel_name] = Channel(channel_name, user);
-		channel_map[channel_name].joinChannel(user, password);
-	}
-}
-
-void Commands::part_handler(Message msg, Client* user, std::map<int, Client>& client_map, std::map<std::string, Channel>& channel_map) {
-	std::vector<std::string> params = msg.getParams();
-
-	if (params.empty())
+	else
 	{
-		sendReply(user->getClientFd(), SERVER_NAME, "461", user->getNickname(), "PART", "Not enough parameters");
-		return ;
-	}
-	std::string channel_name = params[0];
-	std::string reason = (params.size() > 1) ? params [1] : "Leaving";
-	
-	if (!channel_map.count(channel_name))
-	{
-		sendReply(user->getClientFd(), SERVER_NAME, "403", user->getNickname(), channel_name, "No such channel");
-		return ;
-	}
-	if (!channel_map[channel_name].hasUser(user))
-	{
-		sendReply(user->getClientFd(), SERVER_NAME, "442", user->getNickname(), channel_name, "You're not on that channel");
-		return ;
-	}
 
-	channel_map[channel_name].partChannel(user, reason);
-	if (channel_map[channel_name].emptyChannel())
-		channel_map.erase(channel_name);
+		int target_fd = server->getClientFd(target);
+		if (target_fd == -1)
+		{
+			sendReply(user->getClientFd(), server->NAME, "401", user->getNickname(), target, "No such nick");
+			return ;
+		}
+		std::string notice_msg = msg.getPrefix() + " NOTICE " + target + " :" + message + "\r\n";
+		send(target_fd, notice_msg.c_str(), notice_msg.size(), 0);
+	}
 
 }

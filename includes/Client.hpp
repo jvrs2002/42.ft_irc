@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
+/*   By: manelcarvalho <manelcarvalho@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:08 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/26 14:00:02 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/01 17:53:30 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ private:
 	std::set<Channel*> _channels; // stores channels pointers, maximum 10 channels per user
 
 	std::string	_ip;
-	int	_port;
+	std::string	_port;
 
 	int	_socket_fd; // client's socket fd
 
@@ -46,7 +46,14 @@ private:
 public:
 	Client(std::string ip, std::string port, int fd);
 	~Client();
-	int	getClientFd();
+	bool		addToChannel(Channel* channel);
+	bool		receiveBuffer();
+	bool		isRegistered() const;
+	bool		isAuthenticated() const;
+	int			getClientFd() const;
+	std::string	getUsername() const;
+	std::string	getNickname() const;
+	std::string	getRealName() const;
 };
 
 #endif

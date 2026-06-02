@@ -6,29 +6,92 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:06 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/26 14:38:19 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/01 17:44:43 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 
-Client::Client(std::string ip, std::string port, int fd) : _ip(ip), _port(port),
-		_fd(fd), _authenticated(false), _registered(false), _buffer()
+static const size_t MAX_IRC_MSG_LEN = 512;
+
+Client::Client(std::string ip, std::string port, int fd) :
+	_ip(ip),
+	_port(port),
+	_socket_fd(fd),
+	_authenticated(false),
+	_registered(false),
+	_buffer()
 {
-	// connectClient();
-	// add here new_client_handler function
 }
 
 Client::~Client()
 {
-	// add here destroy_client function (it has to delete also from Channel's)
+	if (_socket_fd != -1)
+		close(_socket_fd);
+	
+	_buffer.clear();
 }
 
-// void	receiveIncomingMessage()
-// {
-// }
-
-int	Client::getClientFd()
+/*	(RFC 2812) IRC messages are always lines of characters terminated with a CR-LF (\r\n)
+	pair, and these messages SHALL NOT exceed 512 characters in length, counting
+	all characters including the trailing CR-LF. Thus, there are 510 characters 
+	maximum allowed for the command and its parameters.
+	
+	This function does not deal with incomplete buffers. */
+bool	Client::receiveBuffer()
 {
-	return _fd;
+	if (_socket_fd == -1)
+		return false;
+
+	int	bytes_received;
+	char temp_buffer[MAX_IRC_MSG_LEN + 1];
+
+	bytes_received = recv(_socket_fd, temp_buffer, MAX_IRC_MSG_LEN, 0);
+
+	if (bytes_received <= 0)
+		return false;
+	
+	temp_buffer[bytes_received] = '\0';
+	_buffer.append(temp_buffer);
+	return true;
+}
+
+bool		Client::addToChannel(Channel* channel)
+{
+	if (!channel || channel->hasUser(this) || !_registered || _channels.size() >= 10)
+		return false;
+
+	_channels.insert(channel);
+	return true;
+}
+
+
+std::string	Client::getUsername() const
+{
+	return _username;
+}
+
+std::string	Client::getNickname() const
+{
+	return _nickname;
+}
+
+std::string	Client::getRealName() const
+{
+	return _realname;
+}
+
+int	Client::getClientFd() const
+{
+	return _socket_fd;
+}
+
+bool	Client::isAuthenticated() const
+{
+	return _authenticated;
+}
+
+bool	Client::isRegistered() const
+{
+	return _registered;
 }
