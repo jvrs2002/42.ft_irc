@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:06 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/01 17:44:43 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/02 18:59:48 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,17 +66,17 @@ bool		Client::addToChannel(Channel* channel)
 }
 
 
-std::string	Client::getUsername() const
+const std::string& Client::getUsername() const
 {
 	return _username;
 }
 
-std::string	Client::getNickname() const
+const std::string& Client::getNickname() const
 {
 	return _nickname;
 }
 
-std::string	Client::getRealName() const
+const std::string& Client::getRealName() const
 {
 	return _realname;
 }
