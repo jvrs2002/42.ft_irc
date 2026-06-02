@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "Channel.hpp"
+#include "Client.hpp"
 #include "Utils.hpp"
 
 // static void sendReply(int Clientfd, const std::string& server, const std::string& code, 
@@ -37,7 +38,7 @@ void Channel::joinChannel(std::string prefix, Client *new_user, std::string pass
 		sendReply(new_user->getClientFd(), server_name, "473", new_user->getNickname(), _channel_name, "Cannot join channel +i");
 		return ;
 	}
-	if (_user_limit_active && _users.size() >= _user_limit)
+	if (_user_limit_active && (int)_users.size() >= _user_limit)
 	{
 		sendReply(new_user->getClientFd(), server_name, "471", new_user->getNickname(), _channel_name, "Cannot join channel +l");
 		return ;

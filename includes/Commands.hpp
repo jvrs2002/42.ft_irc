@@ -27,6 +27,8 @@
 
 #define CHANNEL '#'
 
+class Server;
+
 class Commands
 {
 private:

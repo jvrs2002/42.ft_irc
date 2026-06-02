@@ -23,7 +23,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <set>
-#include "Client.hpp"
+
+class Client;
 
 class Channel
 {

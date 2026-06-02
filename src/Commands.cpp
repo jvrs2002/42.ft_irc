@@ -28,7 +28,7 @@ Commands::~Commands()
 
 void Commands::Commandhandler(Message msg, Client* user, Server* server) 
 {
-	_handler[msg.getComand()] (msg, user, server);
+	_handler[msg.getCommand()] (msg, user, server);
 }
 
 // static void sendReply(int Clientfd, const std::string& server, const std::string& code, 
@@ -57,12 +57,27 @@ void Commands::join_handler(Message msg, Client* user, Server* server)
 		sendReply(user->getClientFd(), server->NAME, "403", user->getNickname(), channel_name, "No such channel");
 		return ;
 	}
-	if (channel != NULL)
+	if (channel != NULL) 
+	{
+		if (!user->addToChannel(channel))
+		{
+			sendReply(user->getClientFd(), server->NAME, "443", user->getNickname(), channel_name, "User is already in channel");
+			return ;
+		}
 		channel->joinChannel(msg.getPrefix(), user, password, server->NAME);
+	}
 	else {
-		channel = server->createChannel(channel_name, user); // initialization of Channel (With constructor)? 
+		if (!server->createChannel(channel_name, user))
+		{ 	//Correct error?
+			sendReply(user->getClientFd(), server->NAME, "403", user->getNickname(), channel_name, "No such channel");
+			return ;
+		}
 		channel = server->getChannel(channel_name);
-		*channel = Channel(channel_name, user);
+		if (!user->addToChannel(channel))
+		{	//Correct error?
+			sendReply(user->getClientFd(), server->NAME, "461", user->getNickname(), channel_name, "Error joining channel");
+			return ;
+		}
 		channel->joinChannel(msg.getPrefix(), user, password, server->NAME);
 	}
 }
@@ -130,7 +145,7 @@ void Commands::privmsg_handler(Message msg, Client* user, Server* server)
 	else
 	{
 		int target_fd = server->getClientFd(target);
-		if (!target_fd)
+		if (target_fd == -1)
 		{
 			sendReply(user->getClientFd(), server->NAME, "401", user->getNickname(), target, "No such nick");
 			return ;
@@ -177,7 +192,7 @@ void Commands::notice_handler(Message msg, Client* user, Server* server)
 	{
 
 		int target_fd = server->getClientFd(target);
-		if (!target_fd)
+		if (target_fd == -1)
 		{
 			sendReply(user->getClientFd(), server->NAME, "401", user->getNickname(), target, "No such nick");
 			return ;

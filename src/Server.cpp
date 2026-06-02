@@ -6,7 +6,7 @@
 /*   By: manelcarvalho <manelcarvalho@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/01 10:29:39 by manelcarval      ###   ########.fr       */
+/*   Updated: 2026/06/01 20:15:43 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ void	Server::initServer()
 	struct addrinfo	hints;
 	struct addrinfo	*serv_info;
 
-	memset(&hints, 0, sizeof (hints));
+	memset(&hints, 0, sizeof (hints)); // CHANGE THIS FUNCTION
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = AI_PASSIVE;
@@ -106,19 +106,16 @@ void	Server::acceptClient()
 	addClient(client_ip, client_port, client_fd);
 }
 
-/* void	Server::addClient(const std::string& ip, std::string port, int client_fd)
+void	Server::addClient(const std::string& ip, std::string port, int client_fd)
 {	
 	if (ip.empty() || port.empty() || !client_fd || client_fd == -1)
 		return ;
 
 	Client	new_client(ip, port, client_fd);
-	std::string	buffer = recv();
-
-	if (new_client.parse(buffer) != -1)
-		_clients[client_fd] = new_client;
-
+	_client_map[client_fd] = new_client;
 	
-} */
+	// add to poll() array
+}
 
 int	Server::getClientFd(std::string nickname) const
 {
@@ -133,12 +130,12 @@ int	Server::getClientFd(std::string nickname) const
 	return (-1);
 }
 
-Channel*	Server::getChannel(std::string channel)
+Channel*	Server::getChannel(std::string channel_name)
 {
-	if (channel.empty() || !_channel_map.count(channel))
+	if (channel_name.empty() || !_channel_map.count(channel_name))
 		return NULL;
 
-	return &_channel_map[channel];
+	return &_channel_map[channel_name];
 }
 
 bool	Server::deleteChannel(std::string channel_name)
@@ -157,4 +154,19 @@ void	Server::deleteUser(Client *user)
 {
 	_client_map.erase(user->getClientFd());
 	delete user;
+}
+
+/*	This function doesn't add the new channel into the creator's map.
+	Remember to always call creator's addToChannel() after this call. */
+bool	Server::createChannel(const std::string channel_name, Client *creator)
+{
+	if (channel_name.empty() || !creator || !creator->isRegistered())
+		return false;
+
+	if (_channel_map.find(channel_name) != _channel_map.end())
+		return false;
+
+	Channel	new_channel(channel_name, creator);
+	_channel_map[channel_name] = new_channel;
+	return true;
 }
