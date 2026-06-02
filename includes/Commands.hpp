@@ -6,7 +6,7 @@
 /*   By: manelcarvalho <manelcarvalho@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:15 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/28 08:54:44 by manelcarval      ###   ########.fr       */
+/*   Updated: 2026/06/01 12:25:57 by manelcarval      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,8 @@ class Commands
 private:
 		static void join_handler(Message msg, Client* user, Server* server);		
 		static void part_handler(Message msg, Client* user, Server* server);
-		static void privmsg_handler(Message msg, Client* user, Server* server);		
+		static void privmsg_handler(Message msg, Client* user, Server* server);
+		static void notice_handler(Message msg, Client* user, Server* server);	
 
 		
 		typedef void (*PFnCommandHandler)(Message, Client*, Server*);

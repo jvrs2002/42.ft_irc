@@ -6,7 +6,7 @@
 /*   By: manelcarvalho <manelcarvalho@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:51 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/28 11:28:12 by manelcarval      ###   ########.fr       */
+/*   Updated: 2026/06/01 10:52:32 by manelcarval      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,21 +25,21 @@
 :server 353 nick = #channel :@nick* 
 :server 366 nick #channel :End of /NAMES list */
 
-void Channel::joinChannel(std::string prefix, Client *new_user, std::string password) 
+void Channel::joinChannel(std::string prefix, Client *new_user, std::string password, std::string server_name) 
 {
 	if (_password_active && _password != password)
 	{
-		sendReply(new_user->getClientFd(), SERVER_NAME, "475", new_user->getNickname(), _channel_name, "Cannot join channel +k");
+		sendReply(new_user->getClientFd(), server_name, "475", new_user->getNickname(), _channel_name, "Cannot join channel +k");
 		return ; 
 	}
 	if (_invite_active && !_invited.count(new_user->getNickname()))
 	{
-		sendReply(new_user->getClientFd(), SERVER_NAME, "473", new_user->getNickname(), _channel_name, "Cannot join channel +i");
+		sendReply(new_user->getClientFd(), server_name, "473", new_user->getNickname(), _channel_name, "Cannot join channel +i");
 		return ;
 	}
 	if (_user_limit_active && _users.size() >= _user_limit)
 	{
-		sendReply(new_user->getClientFd(), SERVER_NAME, "471", new_user->getNickname(), _channel_name, "Cannot join channel +l");
+		sendReply(new_user->getClientFd(), server_name, "471", new_user->getNickname(), _channel_name, "Cannot join channel +l");
 		return ;
 	}
 	_users.insert(new_user);
@@ -51,9 +51,9 @@ void Channel::joinChannel(std::string prefix, Client *new_user, std::string pass
 	
 	// if topic message is set
 	if (_topic_active && !_topic.empty())
-		sendReply(new_user->getClientFd(), SERVER_NAME, "332",new_user->getNickname(), _channel_name, _topic);
+		sendReply(new_user->getClientFd(), server_name, "332",new_user->getNickname(), _channel_name, _topic);
 	else
-		sendReply(new_user->getClientFd(), SERVER_NAME, "331",new_user->getNickname(), _channel_name, "No topic is set");
+		sendReply(new_user->getClientFd(), server_name, "331",new_user->getNickname(), _channel_name, "No topic is set");
 	// send name list to new user
 	std::string names = "";
 	for (std::set<Client*>::iterator it = _users.begin(); it != _users.end(); it++) {
@@ -61,8 +61,8 @@ void Channel::joinChannel(std::string prefix, Client *new_user, std::string pass
 			names += "@";
 		names += (*it)->getNickname() + " ";
 	}
-	sendReply(new_user->getClientFd(), SERVER_NAME, "353", new_user->getNickname() + " =", _channel_name, names);
-	sendReply(new_user->getClientFd(), SERVER_NAME, "366", new_user->getNickname(), _channel_name, "End of /NAMES list");
+	sendReply(new_user->getClientFd(), server_name, "353", new_user->getNickname() + " =", _channel_name, names);
+	sendReply(new_user->getClientFd(), server_name, "366", new_user->getNickname(), _channel_name, "End of /NAMES list");
 }
 
 void Channel::partChannel(std::string prefix, Client *user_delete, std::string reason) {
