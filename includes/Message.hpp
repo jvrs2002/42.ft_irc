@@ -6,7 +6,7 @@
 /*   By: ppassos <ppassos@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:20 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/28 18:31:07 by ppassos          ###   ########.fr       */
+/*   Updated: 2026/06/02 18:05:33 by ppassos          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,9 +22,22 @@
 #include <poll.h>
 #include <unistd.h>
 #include <fcntl.h>
+//
+//numero de parms para cada comando min para max:
+//JOIN -> 1-2     1- seria o chanel e o 2- seria a password
+//PART -> 1-2	  1- seria o chanel e o 2- mensagem de despedida
+//PRIVMSG -> 2   SEMPRE 1-seria chanel ou user/users 2-mensagem a ser enviada
+//NOTICE -> 2    1- target 2- message
+//MODE -> 2-"infinite"    1-target 2- mode !!3+ args...!!
+//KICK -> 2-3  1-chanel   2- user  3(optional)-rasao do kick
+//INVITE -> 2  1-user 2-chanel
+//TOPIC  -> 1-2 1-chanel  2-topic
+ 
 //#include "includes/Channel.hpp"
-
-
+//o join do meu colega ja : verifica se o primeiro
+//sao iguais: "JOIN #42 ola" e "JOIN #42 :ola"
+// JOIN #42 ,OLA
+//tenho de fazer um getspefic param 
 /*
 Exemple of messages the class wil handle:
 :joao!user@host PRIVMSG #42 :hi guys how is going?
@@ -48,7 +61,7 @@ public:
 	Message &operator=(const Message &other);
 	~Message();
 	
-	std::string getComand() const;
+	std::string getCommand() const;
 	std::vector<std::string> getParams() const;
 	std::string getPrefix() const;
 
@@ -88,7 +101,7 @@ Message &Message::operator=(const Message &other)
 	return(*this);
 }
 
-std::string Message::getComand() const
+std::string Message::getCommand() const
 {
 	return(this->command);
 }
@@ -153,6 +166,7 @@ void Message::FillMessage(std::string buffer, std::string ip, int len)
 	if (len > 511){
 		std:: cout << "417 ERR_INPUTTOOLONG" <<std::endl;
 		return ;
+		//teria de ser sendReply(user->getClientFd(), SERVER_NAME, "417", user->getNickname(), "", "Input line was too long")
 	}
 	this->prefix = ip;
 	this->command = Fillcommand(buffer);
@@ -160,7 +174,7 @@ void Message::FillMessage(std::string buffer, std::string ip, int len)
 }
 
 
-
+//void Message::FillMessage(Client* user, int len)
 //char *buffer;
 
 #endif
