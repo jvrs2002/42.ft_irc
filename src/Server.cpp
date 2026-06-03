@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: manelcarvalho <manelcarvalho@student.42    +#+  +:+       +#+        */
+/*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/01 20:15:43 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/03 17:23:53 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,7 +112,7 @@ void	Server::addClient(const std::string& ip, std::string port, int client_fd)
 		return ;
 
 	Client	new_client(ip, port, client_fd);
-	_client_map[client_fd] = new_client;
+	_client_map.insert(std::make_pair(client_fd, new_client));
 	
 	// add to poll() array
 }

@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:06 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/03 16:49:59 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/03 17:22:52 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,11 @@
 static const size_t MAX_IRC_MSG_LEN = 512;
 
 Client::Client(std::string ip, std::string port, int fd) :
+	_authenticated(false),
+	_registered(false),
 	_ip(ip),
 	_port(port),
 	_socket_fd(fd),
-	_authenticated(false),
-	_registered(false),
 	_buffer()
 {
 }

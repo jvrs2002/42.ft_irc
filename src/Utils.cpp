@@ -3,17 +3,24 @@
 /*                                                        :::      ::::::::   */
 /*   Utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: manelcarvalho <manelcarvalho@student.42    +#+  +:+       +#+        */
+/*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:09:58 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/28 11:27:39 by manelcarval      ###   ########.fr       */
+/*   Updated: 2026/06/03 17:43:34 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Utils.hpp"
 
+std::string intToString(int number)
+{
+	std::stringstream	ss;
+	ss << number;
+	return ss.str();
+}
+
 // Helper function to get the socket address (IPv4 or IPv6)
-static void *utils_get_in_addr(struct sockaddr *sa)
+void *utils_get_in_addr(struct sockaddr *sa)
 {
 	if (sa->sa_family == AF_INET) {
 		return &(((struct sockaddr_in*)sa)->sin_addr);
@@ -23,7 +30,7 @@ static void *utils_get_in_addr(struct sockaddr *sa)
 }
 
 // Helper function to get the socket port
-static std::string utils_get_port_str(struct sockaddr *sa)
+std::string utils_get_port_str(struct sockaddr *sa)
 {
 	int port = 0;
 
@@ -34,7 +41,7 @@ static std::string utils_get_port_str(struct sockaddr *sa)
 		port = ntohs(((struct sockaddr_in6*)sa)->sin6_port);
 	}
 
-	return std::to_string(port);
+	return intToString(port);
 }
 
 void sendReply(int Clientfd, const std::string& server, const std::string& code, 
