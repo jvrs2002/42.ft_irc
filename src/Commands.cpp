@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: manelcarvalho <manelcarvalho@student.42    +#+  +:+       +#+        */
+/*   By: ppassos <ppassos@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:11 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/01 15:07:15 by manelcarval      ###   ########.fr       */
+/*   Updated: 2026/06/02 19:03:49 by ppassos          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -202,3 +202,48 @@ void Commands::notice_handler(Message msg, Client* user, Server* server)
 	}
 
 }
+
+
+//protocolist work(on going)
+
+void Commands::nick_handler(Message msg, Client* user, Server* server) 
+{
+	if (!user.isAuthenticated()) //fazer funcao
+		return ;
+	if (params.empty())
+	{
+		sendReply(user->getClientFd(), server->NAME, "461", user->getNickname(), "PART", "Not enough parameters");
+		return ;
+	}
+	if (!user.isRegisted()) //fazer funcao
+	{
+		//fazer funcao que ve se o novo nick existe com todos os clientes AUTHENTICADOS
+		return ;
+	}
+	//avisar todos se for mudado o nick em que o cliente esta ligado pelos canais 
+	//fazer funcao que ve
+	
+}
+
+void Commands::pass_handler(Message msg, Client* user, Server* server) 
+{
+	///o get nickname ou user tem de vericar se exite ou nao porque caso nao exista tenho de mandar unknow ou '*' como o nick ou user (if(empty) = '*' || = unknow)
+	std::string password = server.getpassowrd();//fazer funcao 
+	if (user.isAuthenticated()) //fazer funcao
+		return ;
+	if (params.empty())
+	{
+		sendReply(user->getClientFd(), server->NAME, "461", user->getNickname(), "PASS", "Not enough parameters");
+		return ;
+	}
+	std::string password = params[0];
+	if (params[0] !=  password)
+	{
+		sendReply(user->getClientFd(), server->NAME, "464", user->getNickname(), "", "Password incorrect");
+		return ;
+	}
+	user.authenticationSuccess();	//fazer funcao
+}
+
+//authenticado = password aceite que o user deu ou o sv nao tem pass
+//registrado = com um user valido e um nick porem diferente de todos os presentes
