@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/03 17:23:53 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/04 22:23:05 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,12 +18,17 @@ Server::Server(std::string ip, std::string port, std::string password) :
 	_password(password),
 	_socket_fd(-1),
 	_BACKLOG(10),
+	_running(true),
+	_error_code(0),
 	NAME("irc.ft_irc.net")
 {
 	Server::initServer();
 }
 Server::~Server()
 {
+	_client_map.clear();
+	_channel_map.clear();
+
 	if (_socket_fd != -1)
 		close(_socket_fd);
 }
@@ -167,6 +172,24 @@ bool	Server::createChannel(const std::string channel_name, Client *creator)
 		return false;
 
 	Channel	new_channel(channel_name, creator);
+	creator->addToChannel(&new_channel);
 	_channel_map[channel_name] = new_channel;
 	return true;
+}
+
+// the main's while loop depends on the _running as a condition
+void	Server::shutdownServer(int error_code)
+{
+	_running = false;
+	_error_code = error_code;
+}
+
+bool	Server::isRunning()
+{
+	return _running;
+}
+
+int	Server::getErrorCode()
+{
+	return _error_code;
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: manelcarvalho <manelcarvalho@student.42    +#+  +:+       +#+        */
+/*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:25 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/01 17:22:19 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/04 20:52:56 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,16 +38,18 @@
 class Server
 {
 private:
-	const std::string			_ip;				// usually 127.0.0.1
-	std::string					_port;
-	std::string					_password;
-	int							_socket_fd;			// server's socket fd
+	const std::string				_ip;				// usually 127.0.0.1
+	std::string						_port;
+	std::string						_password;
+	int								_socket_fd;			// server's socket fd
 
 	Commands						command_handler;
 	std::map<std::string, Channel>	_channel_map;		// each channel is mapped by their name
 	std::map<int, Client>			_client_map;		// each client is mapped by it's socket fd
 
-	const int _BACKLOG;
+	const int						_BACKLOG;
+	bool							_running;			// condition for while loop
+	int								_error_code;
 public:
 	const std::string NAME;
 
@@ -63,7 +65,9 @@ public:
 	Channel*	getChannel(std::string channel_name);
 	bool		deleteChannel(std::string channel_name);
 	void		deleteUser(Client *user);
-
+	void		shutdownServer(int error_code);
+	bool		isRunning();
+	int			getErrorCode();
 
 };
 

@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:06 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/03 17:22:52 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/04 20:57:09 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,13 @@ Client::~Client()
 		close(_socket_fd);
 	
 	_buffer.clear();
+	std::set<Channel*>::iterator it;
+
+	for (it = _channels.begin(); it != _channels.end(); ++it) {
+		delete *it;
+	}
+
+	_channels.clear();
 }
 
 /*	(RFC 2812) IRC messages are always lines of characters terminated with a CR-LF (\r\n)
