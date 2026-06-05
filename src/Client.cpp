@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:06 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/05 18:47:48 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/05 22:51:02 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,9 @@ Client::~Client()
 	std::set<Channel*>::iterator it;
 
 	for (it = _channels.begin(); it != _channels.end(); ++it) {
-		delete *it;
+		if (*it != NULL) {
+			(*it)->removeUser(this); // still need this function
+		}
 	}
 
 	_channels.clear();
