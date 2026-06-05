@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:08 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/02 19:00:35 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/05 18:44:20 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,8 @@
 # include <unistd.h>
 # include <fcntl.h>
 # include <set>
-# include "Channel.hpp"
+
+class Channel;
 
 class Client
 {
@@ -44,8 +45,10 @@ private:
 
 	std::string	_buffer;
 public:
-	Client(std::string ip, std::string port, int fd);
+	Client();
+	Client(const std::string& ip, const std::string&, int fd);
 	~Client();
+	bool				initClient(const std::string& ip, const std::string& port, int fd);
 	bool				addToChannel(Channel* channel);
 	bool				receiveBuffer();
 	bool				isRegistered() const;

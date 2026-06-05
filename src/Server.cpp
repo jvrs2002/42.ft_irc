@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/04 22:23:05 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/05 18:39:55 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,13 +111,14 @@ void	Server::acceptClient()
 	addClient(client_ip, client_port, client_fd);
 }
 
-void	Server::addClient(const std::string& ip, std::string port, int client_fd)
+void	Server::addClient(const std::string& ip, const std::string& port, int client_fd)
 {	
 	if (ip.empty() || port.empty() || !client_fd || client_fd == -1)
 		return ;
 
-	Client	new_client(ip, port, client_fd);
-	_client_map.insert(std::make_pair(client_fd, new_client));
+	Client	new_client;
+	new_client.initClient(ip, port, client_fd); // init returns bool, might put a condition to check
+	_client_map[client_fd] = new_client;
 	
 	// add to poll() array
 }

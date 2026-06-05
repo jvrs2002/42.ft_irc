@@ -6,15 +6,27 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:06 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/04 20:57:09 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/05 18:47:48 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
+#include "Channel.hpp"
 
 static const size_t MAX_IRC_MSG_LEN = 512;
 
-Client::Client(std::string ip, std::string port, int fd) :
+Client::Client() :
+	_authenticated(false),
+	_registered(false),
+	_ip(),
+	_port(),
+	_socket_fd(-1),
+	_buffer()
+{
+
+}
+
+Client::Client(const std::string& ip, const std::string& port, int fd) :
 	_authenticated(false),
 	_registered(false),
 	_ip(ip),
@@ -37,6 +49,17 @@ Client::~Client()
 	}
 
 	_channels.clear();
+}
+
+bool	Client::initClient(const std::string& ip, const std::string& port, int fd)
+{
+	if (ip.empty() || port.empty() || fd == -1)
+		return false;
+	
+	_ip = ip;
+	_port = port;
+	_socket_fd = fd;
+	return true;
 }
 
 /*	(RFC 2812) IRC messages are always lines of characters terminated with a CR-LF (\r\n)
