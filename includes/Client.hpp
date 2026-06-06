@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:08 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/05 18:44:20 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/06 20:04:39 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,10 +53,16 @@ public:
 	bool				receiveBuffer();
 	bool				isRegistered() const;
 	bool				isAuthenticated() const;
+	bool				setRegistered();
+	void				setAuthenticated();
 	int					getClientFd() const;
+	const std::string&	getClientIP() const;
 	const std::string&	getUsername() const;
 	const std::string&	getNickname() const;
 	const std::string&	getRealName() const;
+	bool				setNickname(std::string nickname);
+	bool				setUsername(std::string username);
+	bool				setRealname(std::string realname);	
 };
 
 #endif

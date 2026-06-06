@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:06 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/05 22:51:02 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/06 19:59:10 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,4 +126,52 @@ bool	Client::isAuthenticated() const
 bool	Client::isRegistered() const
 {
 	return _registered;
+}
+
+bool	Client::setRegistered()
+{
+	if (!_authenticated)
+		return false;
+
+	if (_nickname.empty() || _username.empty())
+		return false;
+
+	_registered = true;
+	return true;
+}
+
+void	Client::setAuthenticated()
+{
+	_authenticated = true;
+}
+
+bool	Client::setNickname(std::string nickname)
+{
+	if (nickname.empty())
+		return false;
+	
+	_nickname = nickname;
+	return true;
+}
+
+bool	Client::setRealname(std::string realname)
+{
+	if (realname.empty())
+		return false;
+	
+	_realname = realname;
+	return true;
+}
+
+bool	Client::setUsername(std::string username)
+{
+	if (username.empty())
+		return false;
+	
+	_username = username;
+	return true;
+}
+const std::string& Client::getClientIP() const
+{
+	return _ip;
 }
