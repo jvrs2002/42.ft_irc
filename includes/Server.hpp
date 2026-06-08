@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:25 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/05 17:33:41 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/08 17:40:40 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,8 @@ public:
 	void		shutdownServer(int error_code);
 	bool		isRunning();
 	int			getErrorCode();
+	bool		userExists(const std::string& nickname) const;
+
 };
 
 #endif

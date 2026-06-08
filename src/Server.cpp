@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/05 18:39:55 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/08 17:40:39 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -193,4 +193,17 @@ bool	Server::isRunning()
 int	Server::getErrorCode()
 {
 	return _error_code;
+}
+
+bool	Server::userExists(const std::string& nickname) const
+{
+	if (nickname.empty())
+		return false;
+	
+	for (std::map<int, Client>::const_iterator it = _client_map.begin(); it != _client_map.end(); ++it) {
+		if (it->second.getNickname() == nickname)
+			return true;
+	}
+
+	return false;
 }
