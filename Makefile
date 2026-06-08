@@ -1,6 +1,6 @@
 NAME = ircserv
 C++ = c++
-C++_FLAGS = -Wall -Wextra -Werror -std=c++98 -Iincludes
+C++_FLAGS = -Wall -Wextra -Werror -std=c++98 -Iincludes -g
 
 FILES = src/main.cpp \
 		src/Channel.cpp \
@@ -8,7 +8,6 @@ FILES = src/main.cpp \
 		src/Commands.cpp \
 		src/Message.cpp \
 		src/Server.cpp \
-		src/Socket.cpp \
 		src/Utils.cpp
 
 OBJFILES = $(FILES:.cpp=.o)

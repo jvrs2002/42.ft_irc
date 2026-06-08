@@ -19,6 +19,7 @@ Commands::Commands()
 	_handler["PART"] = &part_handler;
 	_handler["PRIVMSG"] = &privmsg_handler;
 	_handler["NOTICE"] = &notice_handler;
+	_handler["MODE"] = &mode_handler;
 }
 
 Commands::~Commands()
@@ -52,7 +53,7 @@ void Commands::join_handler(Message msg, Client* user, Server* server)
 	Channel*	channel = server->getChannel(channel_name);
 	std::string password = (params.size() > 1) ? params[1] : "";
 
-	if (channel_name.size() <= 1 || channel_name[0] != '#')
+	if (channel_name.size() <= 1 || channel_name[0] != CHANNEL)
 	{
 		sendReply(user->getClientFd(), server->NAME, "403", user->getNickname(), channel_name, "No such channel");
 		return ;
@@ -140,7 +141,7 @@ void Commands::privmsg_handler(Message msg, Client* user, Server* server)
 			sendReply(user->getClientFd(), server->NAME, "404", user->getNickname(), target, "Cannot send to channel");
 			return ;
 		}
-		channel->ChannelMessage(msg.getPrefix(), user, message);
+		channel->ChannelMessage(msg.getPrefix(), user, " PRIVMSG ", message);
 	}
 	else
 	{
@@ -186,7 +187,7 @@ void Commands::notice_handler(Message msg, Client* user, Server* server)
 			sendReply(user->getClientFd(), server->NAME, "404", user->getNickname(), target, "Cannot send to channel");
 			return ;
 		}
-		channel->ChannelMessage(msg.getPrefix(), user, message);
+		channel->ChannelMessage(msg.getPrefix(), user, " NOTICE ", message);
 	}
 	else
 	{
@@ -203,47 +204,67 @@ void Commands::notice_handler(Message msg, Client* user, Server* server)
 
 }
 
+void Commands::mode_handler(Message msg, Client* user, Server* server) 
+{
+	std::vector<std::string> params = msg.getParams();
+	if (params.size() < 2)
+	{
+		sendReply(user->getClientFd(), server->NAME, "461", user->getNickname(), "MODE", "Not enough parameters");
+		return ;
+	}
+	std::string channel_name = params[0];
+	std::string modestring = params[1];
+
+	// std::string args = params[2];
+
+	char **args[number_of_args] = handle_args(std::string modestring);
+	for (int i = 0; i < number_of_args; i++); {
+		_mode_functions[i] (args[i]);
+	}
+}
+
+
 
 //protocolist work(on going)
 
-void Commands::nick_handler(Message msg, Client* user, Server* server) 
-{
-	if (!user.isAuthenticated()) //fazer funcao
-		return ;
-	if (params.empty())
-	{
-		sendReply(user->getClientFd(), server->NAME, "461", user->getNickname(), "PART", "Not enough parameters");
-		return ;
-	}
-	if (!user.isRegisted()) //fazer funcao
-	{
-		//fazer funcao que ve se o novo nick existe com todos os clientes AUTHENTICADOS
-		return ;
-	}
-	//avisar todos se for mudado o nick em que o cliente esta ligado pelos canais 
-	//fazer funcao que ve
+// void Commands::nick_handler(Message msg, Client* user, Server* server) 
+// {
+// 	if (!user.isAuthenticated()) //fazer funcao
+// 		return ;
+// 	if (params.empty())
+// 	{
+// 		sendReply(user->getClientFd(), server->NAME, "461", user->getNickname(), "PART", "Not enough parameters");
+// 		return ;
+// 	}
+// 	if (!user.isRegisted()) //fazer funcao
+// 	{
+// 		//fazer funcao que ve se o novo nick existe com todos os clientes AUTHENTICADOS
+// 		return ;
+// 	}
+// 	//avisar todos se for mudado o nick em que o cliente esta ligado pelos canais 
+// 	//fazer funcao que ve
 	
-}
+// }
 
-void Commands::pass_handler(Message msg, Client* user, Server* server) 
-{
-	///o get nickname ou user tem de vericar se exite ou nao porque caso nao exista tenho de mandar unknow ou '*' como o nick ou user (if(empty) = '*' || = unknow)
-	std::string password = server.getpassowrd();//fazer funcao 
-	if (user.isAuthenticated()) //fazer funcao
-		return ;
-	if (params.empty())
-	{
-		sendReply(user->getClientFd(), server->NAME, "461", user->getNickname(), "PASS", "Not enough parameters");
-		return ;
-	}
-	std::string password = params[0];
-	if (params[0] !=  password)
-	{
-		sendReply(user->getClientFd(), server->NAME, "464", user->getNickname(), "", "Password incorrect");
-		return ;
-	}
-	user.authenticationSuccess();	//fazer funcao
-}
+// void Commands::pass_handler(Message msg, Client* user, Server* server) 
+// {
+// 	///o get nickname ou user tem de vericar se exite ou nao porque caso nao exista tenho de mandar unknow ou '*' como o nick ou user (if(empty) = '*' || = unknow)
+// 	std::string password = server.getpassowrd();//fazer funcao 
+// 	if (user.isAuthenticated()) //fazer funcao
+// 		return ;
+// 	if (params.empty())
+// 	{
+// 		sendReply(user->getClientFd(), server->NAME, "461", user->getNickname(), "PASS", "Not enough parameters");
+// 		return ;
+// 	}
+// 	std::string password = params[0];
+// 	if (params[0] !=  password)
+// 	{
+// 		sendReply(user->getClientFd(), server->NAME, "464", user->getNickname(), "", "Password incorrect");
+// 		return ;
+// 	}
+// 	user.authenticationSuccess();	//fazer funcao
+// }
 
 //authenticado = password aceite que o user deu ou o sv nao tem pass
 //registrado = com um user valido e um nick porem diferente de todos os presentes

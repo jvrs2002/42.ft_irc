@@ -17,9 +17,6 @@
 #include <vector>
 #include <map>
 #include <string>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <poll.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <set>
@@ -57,7 +54,7 @@ public:
 
 	void	joinChannel(std::string prefix, Client* new_user, std::string password, std::string server_name);
 	void	partChannel(std::string prefix, Client* user_delete, std::string reason);
-	void	ChannelMessage(std::string prefix, Client* sender, std::string buffer);
+	void	ChannelMessage(std::string prefix, Client* sender, std::string command, std::string buffer);
 
 	
 };

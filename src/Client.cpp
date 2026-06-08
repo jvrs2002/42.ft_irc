@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ppassos <ppassos@student.42.fr>            +#+  +:+       +#+        */
+/*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:06 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/02 18:16:50 by ppassos          ###   ########.fr       */
+/*   Updated: 2026/06/03 17:22:52 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,11 @@
 static const size_t MAX_IRC_MSG_LEN = 512;
 
 Client::Client(std::string ip, std::string port, int fd) :
+	_authenticated(false),
+	_registered(false),
 	_ip(ip),
 	_port(port),
 	_socket_fd(fd),
-	_authenticated(false),
-	_registered(false),
 	_buffer()
 {
 }
@@ -66,17 +66,17 @@ bool		Client::addToChannel(Channel* channel)
 }
 
 
-std::string	Client::getUsername() const
+const std::string& Client::getUsername() const
 {
 	return _username;
 }
 
-std::string	Client::getNickname() const
+const std::string& Client::getNickname() const
 {
 	return _nickname;
 }
 
-std::string	Client::getRealName() const
+const std::string& Client::getRealName() const
 {
 	return _realname;
 }

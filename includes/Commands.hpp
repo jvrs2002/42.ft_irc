@@ -36,6 +36,7 @@ private:
 		static void part_handler(Message msg, Client* user, Server* server);
 		static void privmsg_handler(Message msg, Client* user, Server* server);
 		static void notice_handler(Message msg, Client* user, Server* server);	
+		// static void mode_handler(Message msg, Client* user, Server* server);	
 
 		
 		typedef void (*PFnCommandHandler)(Message, Client*, Server*);
