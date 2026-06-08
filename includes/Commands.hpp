@@ -35,7 +35,10 @@ private:
 		static void join_handler(Message msg, Client* user, Server* server);		
 		static void part_handler(Message msg, Client* user, Server* server);
 		static void privmsg_handler(Message msg, Client* user, Server* server);
-		static void notice_handler(Message msg, Client* user, Server* server);	
+		static void notice_handler(Message msg, Client* user, Server* server);
+		static void pass_handler(Message msg, Client* user, Server* server);
+		static void user_handler(Message msg, Client* user, Server* server);
+		//static void nick_handler(Message msg, Client* user, Server* server);
 		// static void mode_handler(Message msg, Client* user, Server* server);	
 
 		

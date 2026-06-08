@@ -20,7 +20,9 @@ Commands::Commands()
 	_handler["PRIVMSG"] = &privmsg_handler;
 	_handler["NOTICE"] = &notice_handler;
 	_handler["MODE"] = &mode_handler;
-}
+	_handler["PASS"] = &pass_handler;
+	_handler["USER"] = &user_handler;
+	//_handler["NICK"] = &nick_handler;   por terminar
 
 Commands::~Commands()
 {
@@ -41,6 +43,10 @@ void Commands::Commandhandler(Message msg, Client* user, Server* server)
 
 void Commands::join_handler(Message msg, Client* user, Server* server)
 {
+	if (!user->isRegistered()){
+		sendReply(user->getClientFd(), server->NAME, "451", user->getNickname(), "", "You have not registered");
+		return ;
+	}
 	std::vector<std::string> params = msg.getParams();
 
 	if (params.empty())
@@ -85,6 +91,10 @@ void Commands::join_handler(Message msg, Client* user, Server* server)
 
 void Commands::part_handler(Message msg, Client* user, Server* server) 
 {
+	if (!user->isRegistered()){
+		sendReply(user->getClientFd(), server->NAME, "451", user->getNickname(), "", "You have not registered");
+		return ;
+	}
 	std::vector<std::string> params = msg.getParams();
 
 	if (params.empty())
@@ -114,6 +124,10 @@ void Commands::part_handler(Message msg, Client* user, Server* server)
 
 void Commands::privmsg_handler(Message msg, Client* user, Server* server) 
 {
+	if (!user->isRegistered()){
+		sendReply(user->getClientFd(), server->NAME, "451", user->getNickname(), "", "You have not registered");
+		return ;
+	}
 	std::vector<std::string> params = msg.getParams();
 	if (params.size() < 1)
 	{
@@ -159,6 +173,10 @@ void Commands::privmsg_handler(Message msg, Client* user, Server* server)
 
 void Commands::notice_handler(Message msg, Client* user, Server* server) 
 {
+	if (!user->isRegistered()){
+		sendReply(user->getClientFd(), server->NAME, "451", user->getNickname(), "", "You have not registered");
+		return ;
+	}
 	std::vector<std::string> params = msg.getParams();
 
 	if (params.size() < 1)
@@ -206,6 +224,10 @@ void Commands::notice_handler(Message msg, Client* user, Server* server)
 
 void Commands::mode_handler(Message msg, Client* user, Server* server) 
 {
+	if (!user->isRegistered()){
+		sendReply(user->getClientFd(), server->NAME, "451", user->getNickname(), "", "You have not registered");
+		return ;
+	}
 	std::vector<std::string> params = msg.getParams();
 	if (params.size() < 2)
 	{
@@ -227,44 +249,68 @@ void Commands::mode_handler(Message msg, Client* user, Server* server)
 
 //protocolist work(on going)
 
-// void Commands::nick_handler(Message msg, Client* user, Server* server) 
-// {
-// 	if (!user.isAuthenticated()) //fazer funcao
-// 		return ;
-// 	if (params.empty())
-// 	{
-// 		sendReply(user->getClientFd(), server->NAME, "461", user->getNickname(), "PART", "Not enough parameters");
-// 		return ;
-// 	}
-// 	if (!user.isRegisted()) //fazer funcao
-// 	{
-// 		//fazer funcao que ve se o novo nick existe com todos os clientes AUTHENTICADOS
-// 		return ;
-// 	}
-// 	//avisar todos se for mudado o nick em que o cliente esta ligado pelos canais 
-// 	//fazer funcao que ve
-	
-// }
+/*void Commands::nick_handler(Message msg, Client* user, Server* server) 
+{
+	std::vector<std::string> params = msg.getParams();
+	if (params.empty())
+	{
+		sendReply(user->getClientFd(), server->NAME, "461", user->getNickname(), "NICK", "Not enough parameters");
+		return ;
+	}
+	if (server.userExists(params[0])) // por fazer funcao (existe ja?)
+	{
+		sendReply(user->getClientFd(), server->NAME, "433", user->getNickname(), "", "Nickname is already in use");
+		return ;
+	}
+	user->setNickname(params[0]);
+	if (user->isRegistered())
+		broadcast("");//comunicar com  todos os clientes que foi mudado o nick do cliente que esta ligado pelos canais 
+	if (!(user->isRegistered()) && user->hasNick() && user->hasUser() && user->isAuthenticated())
+    	user->setregistered()
+}*/
 
-// void Commands::pass_handler(Message msg, Client* user, Server* server) 
-// {
-// 	///o get nickname ou user tem de vericar se exite ou nao porque caso nao exista tenho de mandar unknow ou '*' como o nick ou user (if(empty) = '*' || = unknow)
-// 	std::string password = server.getpassowrd();//fazer funcao 
-// 	if (user.isAuthenticated()) //fazer funcao
-// 		return ;
-// 	if (params.empty())
-// 	{
-// 		sendReply(user->getClientFd(), server->NAME, "461", user->getNickname(), "PASS", "Not enough parameters");
-// 		return ;
-// 	}
-// 	std::string password = params[0];
-// 	if (params[0] !=  password)
-// 	{
-// 		sendReply(user->getClientFd(), server->NAME, "464", user->getNickname(), "", "Password incorrect");
-// 		return ;
-// 	}
-// 	user.authenticationSuccess();	//fazer funcao
-// }
+void Commands::pass_handler(Message msg, Client* user, Server* server) 
+{
+	///o get nickname ou user tem de vericar se exite ou nao porque caso nao exista tenho de mandar unknow ou '*' como o nick ou user (if(empty) = '*' || = unknow)
+	std::string password = server->getpassoword();//fazer funcao
+	std::vector<std::string> params = msg.getParams();
+	if (user->isAuthenticated()){ //fazer funcao
+		sendReply(user->getClientFd(), server->NAME, "462", user->getNickname(), "PASS", "Already registered"); //independente de estar registrado ou nao, tenho mandar esta mensagem se estiver autenthicado
+		return ;
+	}
+	if (params.empty())
+	{
+		sendReply(user->getClientFd(), server->NAME, "461", user->getNickname(), "PASS", "Not enough parameters");
+		return ;
+	}
+	std::string params_password = params[0];
+	if (params_password !=  password)
+	{
+		sendReply(user->getClientFd(), server->NAME, "464", user->getNickname(), "", "Password incorrect");
+		return ;
+	}
+	user->setAuthenticated();	//fazer funcao
+	if (user->hasNick() && user->hasUser() && user->hisAuthenticated())
+    	user->setRegistered()
+}
 
+void Commands::user_handler(Message msg, Client* user, Server* server)
+{
+	std::vector<std::string> params = msg.getParams();
+	if (user->isRegistered()){
+		sendReply(user->getClientFd(), server->NAME, "462", user->getNickname(), "USER", "Already registered");
+		return ;
+	}
+	if(params.size() < 4){
+		sendReply(user->getClientFd(), server->NAME, "461", user->getNickname(), "USER", "Not enough parameters");
+		return ;	
+	}
+	user->setUsername(params[0]);
+	user->setRealName(params[3]);
+	if (user->hasNick() && user->hasUser() && user->hisAuthenticated())
+    	user->setRegistered()
+}
+
+//ATENCAO!!! -> estado do cliente tem prioridade sobre parsing leve
 //authenticado = password aceite que o user deu ou o sv nao tem pass
 //registrado = com um user valido e um nick porem diferente de todos os presentes
