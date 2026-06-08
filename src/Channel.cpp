@@ -78,8 +78,8 @@ void Channel::partChannel(std::string prefix, Client *user_delete, std::string r
 	
 }
 
-void Channel::ChannelMessage(std::string prefix, Client *sender, std::string buffer) {
-	std::string msg = prefix + " PRIVMSG " + _channel_name + " :" + buffer + "\r\n";
+void Channel::ChannelMessage(std::string prefix, Client *sender, std::string command, std::string buffer) {
+	std::string msg = prefix + command + _channel_name + " :" + buffer + "\r\n";
 	for (std::set<Client*>::iterator it = _users.begin(); it != _users.end(); it++) {
 		if (sender->getClientFd() == (*it)->getClientFd())
 			continue ;
