@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/09 21:12:37 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/09 22:24:47 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,7 +125,10 @@ void	Server::addClient(const std::string& ip, const std::string& port, int clien
 		return ;
 
 	Client&	new_client = _client_map[client_fd];
-	new_client.initClient(ip, port, client_fd); // init returns bool, might put a condition to check
+	
+	if (new_client.initClient(ip, port, client_fd) == -1) {
+		// remove newly created Client from map and close fd
+	}
 
 	struct pollfd	pfd;
 	pfd.fd = client_fd;
@@ -169,8 +172,19 @@ bool	Server::deleteChannel(const std::string& channel_name)
 
 void	Server::deleteUser(Client *user)
 {
-	_client_map.erase(user->getClientFd());
-	delete user;
+	if (!userExists(user->getNickname()))
+		return ;
+
+	int	client_fd = user->getClientFd();
+	std::vector<struct pollfd>::iterator it = _pollfd_vector.begin();
+
+	while (it != _pollfd_vector.end() && it->fd != client_fd)
+		++it;
+
+	if (it != _pollfd_vector.end())
+		_pollfd_vector.erase(it);
+
+	_client_map.erase(client_fd);
 }
 
 /*	This function doesn't add the new channel into the creator's map.
