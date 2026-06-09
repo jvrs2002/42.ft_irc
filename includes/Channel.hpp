@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: manelcarvalho <manelcarvalho@student.42    +#+  +:+       +#+        */
+/*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:03 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/01 10:49:32 by manelcarval      ###   ########.fr       */
+/*   Updated: 2026/06/09 11:57:34 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,7 @@ public:
 	void	joinChannel(std::string prefix, Client* new_user, std::string password, std::string server_name);
 	void	partChannel(std::string prefix, Client* user_delete, std::string reason);
 	void	ChannelMessage(std::string prefix, Client* sender, std::string command, std::string buffer);
-
+	void	removeUser(Client *user);
 	
 };
 

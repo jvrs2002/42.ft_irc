@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:06 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/06 19:59:10 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/09 12:23:14 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,9 +45,7 @@ Client::~Client()
 	std::set<Channel*>::iterator it;
 
 	for (it = _channels.begin(); it != _channels.end(); ++it) {
-		if (*it != NULL) {
 			(*it)->removeUser(this); // still need this function
-		}
 	}
 
 	_channels.clear();
@@ -145,7 +143,7 @@ void	Client::setAuthenticated()
 	_authenticated = true;
 }
 
-bool	Client::setNickname(std::string nickname)
+bool	Client::setNickname(const std::string& nickname)
 {
 	if (nickname.empty())
 		return false;
@@ -154,7 +152,7 @@ bool	Client::setNickname(std::string nickname)
 	return true;
 }
 
-bool	Client::setRealname(std::string realname)
+bool	Client::setRealname(const std::string& realname)
 {
 	if (realname.empty())
 		return false;
@@ -163,7 +161,7 @@ bool	Client::setRealname(std::string realname)
 	return true;
 }
 
-bool	Client::setUsername(std::string username)
+bool	Client::setUsername(const std::string& username)
 {
 	if (username.empty())
 		return false;
@@ -174,4 +172,13 @@ bool	Client::setUsername(std::string username)
 const std::string& Client::getClientIP() const
 {
 	return _ip;
+}
+
+bool	Client::disconnectChannel(Channel *channel)
+{
+	if (!channel)
+		return false;
+
+	_channels.erase(channel);
+	return true;
 }

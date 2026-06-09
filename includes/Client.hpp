@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:08 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/06 20:04:39 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/09 12:10:31 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,9 +60,10 @@ public:
 	const std::string&	getUsername() const;
 	const std::string&	getNickname() const;
 	const std::string&	getRealName() const;
-	bool				setNickname(std::string nickname);
-	bool				setUsername(std::string username);
-	bool				setRealname(std::string realname);	
+	bool				setNickname(const std::string& nickname);
+	bool				setUsername(const std::string& username);
+	bool				setRealname(const std::string& realname);
+	bool				disconnectChannel(Channel *channel);
 };
 
 #endif
