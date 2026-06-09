@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: manelcarvalho <manelcarvalho@student.42    +#+  +:+       +#+        */
+/*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:51 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/01 10:52:32 by manelcarval      ###   ########.fr       */
+/*   Updated: 2026/06/09 12:17:48 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,20 @@
 #include "Client.hpp"
 #include "Utils.hpp"
 
-// static void sendReply(int Clientfd, const std::string& server, const std::string& code, 
-// 	const std::string& target, const std::string& params, const std::string& trailing) 
-// {
-// 	std::string msg = ":" + server + " " + code + " " + target + " " + params + " :" + trailing + "\r\n";
-// 	send(Clientfd, msg.c_str(), msg.size(), 0);
-// }
+void	Channel::setInvite(char c) {
+	if (c == '+')
+		_invite_active = true;
+	else 
+		_invite_active = false;
+}
+
+void	Channel::setTopic(char c) {
+	if (c == '+')
+		_topic_active = true;
+	else
+		_topic_active = false;
+		
+}
 
 /* :nick!user@host JOIN :#channel
 :server 331 nick #channel :No topic is set
@@ -75,7 +83,7 @@ void Channel::partChannel(std::string prefix, Client *user_delete, std::string r
 	if (_operators.count(user_delete))
 		_operators.erase(user_delete);
 	_users.erase(user_delete);
-	
+	user_delete->disconnectChannel(this);
 }
 
 void Channel::ChannelMessage(std::string prefix, Client *sender, std::string command, std::string buffer) {
@@ -85,6 +93,12 @@ void Channel::ChannelMessage(std::string prefix, Client *sender, std::string com
 			continue ;
 		send((*it)->getClientFd(), msg.c_str(), msg.size(), 0);
 	}
+}
+
+void Channel::ChannelBroadcast(std::string prefix, Client *sender, std::string command, std::string buffer) {
+	std::string msg = prefix + command + _channel_name + buffer + "\r\n";
+	for (std::set<Client*>::iterator it = _users.begin(); it != _users.end(); it++)
+		send((*it)->getClientFd(), msg.c_str(), msg.size(), 0);
 }
 
 std::string Channel::getName() const {
@@ -97,6 +111,15 @@ bool	Channel::hasUser(Client *user) const {
 
 bool	Channel::emptyChannel() const {
 	return (_users.empty());
+}
+
+void	Channel::removeUser(Client *user)
+{
+	if (_users.count(user))
+		_users.erase(user);
+
+	if (_operators.count(user))
+		_operators.erase(user);
 }
 
 Channel::Channel(){}

@@ -23,6 +23,7 @@ Commands::Commands()
 	_handler["PASS"] = &pass_handler;
 	_handler["USER"] = &user_handler;
 	//_handler["NICK"] = &nick_handler;   por terminar
+}
 
 Commands::~Commands()
 {
@@ -236,12 +237,57 @@ void Commands::mode_handler(Message msg, Client* user, Server* server)
 	}
 	std::string channel_name = params[0];
 	std::string modestring = params[1];
-
+	
+	// test
+	int k = params.size() - 2;
+	std::string args[k];
+	while (k > 0)
+	{
+		args[k] = params[k];
+		k--;
+	}
+	k = 0;
+	Channel* channel = server->getChannel(channel_name);
 	// std::string args = params[2];
 
-	char **args[number_of_args] = handle_args(std::string modestring);
-	for (int i = 0; i < number_of_args; i++); {
-		_mode_functions[i] (args[i]);
+	// char **args[number_of_args] = handle_args(std::string modestring);
+	// for (int i = 0; i < number_of_args; i++); {
+	// 	_mode_functions[i] (args[i]);
+	// }
+
+	char sign;
+	std::string nickname;
+	std::string max_size;
+	int arg_index = 2;
+	for (int i = 0; modestring[i] != NULL; i++) {
+		if (modestring[i] == '+' || modestring[i] == '-')
+			sign = modestring[i++];
+		switch (modestring[i])
+		{
+			case 'i':
+				channel->setInvite(sign);
+				channel->ChannelBroadcast(msg.getPrefix(), user, " MODE ", sign + "i");
+				break;
+			case 't':
+				channel->setTopic(sign);
+				channel->ChannelBroadcast(msg.getPrefix(), user, " MODE ", sign + "t");
+				break;
+			case 'k':
+				if (arg_index < (int)params.size())
+					std::string password = params[arg_index++];
+				break;
+			case 'o':
+				nickname = args[k];
+				k++;
+				break;
+			case 'l':
+				max_size = args[k];
+				k++;
+				break;
+			
+			default:
+				break;
+		}
 	}
 }
 
@@ -272,7 +318,7 @@ void Commands::mode_handler(Message msg, Client* user, Server* server)
 void Commands::pass_handler(Message msg, Client* user, Server* server) 
 {
 	///o get nickname ou user tem de vericar se exite ou nao porque caso nao exista tenho de mandar unknow ou '*' como o nick ou user (if(empty) = '*' || = unknow)
-	std::string password = server->getpassoword();//fazer funcao
+	std::string password = server->getpassword();//fazer funcao
 	std::vector<std::string> params = msg.getParams();
 	if (user->isAuthenticated()){ //fazer funcao
 		sendReply(user->getClientFd(), server->NAME, "462", user->getNickname(), "PASS", "Already registered"); //independente de estar registrado ou nao, tenho mandar esta mensagem se estiver autenthicado
