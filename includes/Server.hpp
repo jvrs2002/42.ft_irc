@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:25 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/09 18:03:31 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/09 20:51:19 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,20 +47,20 @@ private:
 	std::map<std::string, Channel>	_channel_map;		// each channel is mapped by their name
 	std::map<int, Client>			_client_map;		// each client is mapped by it's socket fd
 	std::vector<struct pollfd>		_pollfd_vector;
+
 	const int						_BACKLOG;
 	bool							_running;			// condition for while loop
 	int								_error_code;
 public:
 	const std::string NAME;
 
-	Server(std::string ip, std::string port, std::string password);
+	Server(const std::string& ip, const std::string& port, const std::string& password);
 	~Server();
 
 	void		initServer();
 	void		acceptClient();
 	void		addClient(const std::string& ip, const std::string& port, int client_fd);
-	bool		createChannel(const std::string channel_name, Client *creator);
-	// void		deleteClient(Client *user);
+	bool		createChannel(const std::string& channel_name, Client *creator);
 	int			getClientFd(const std::string& nickname) const;
 	Channel*	getChannel(const std::string& channel_name);
 	bool		deleteChannel(const std::string& channel_name);
@@ -69,7 +69,6 @@ public:
 	bool		isRunning();
 	int			getErrorCode();
 	bool		userExists(const std::string& nickname) const;
-
 };
 
 struct pollfd {

@@ -6,13 +6,13 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/09 18:26:23 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/09 21:12:37 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 
-Server::Server(std::string ip, std::string port, std::string password) :
+Server::Server(const std::string& ip, const std::string& port, const std::string& password) :
 	_ip(ip),
 	_port(port), 
 	_password(password),
@@ -20,7 +20,7 @@ Server::Server(std::string ip, std::string port, std::string password) :
 	_BACKLOG(10),
 	_running(true),
 	_error_code(0),
-	NAME("irc.ft_irc.net")
+	NAME("irc.ft_irc.net") // still need to pick a name
 {
 	Server::initServer();
 }
@@ -50,7 +50,7 @@ void	Server::initServer()
 
 	status = getaddrinfo(NULL, _port.c_str(), &hints, &serv_info);
 
-	if (status != 0){
+	if (status != 0) {
 		std::cerr << "getaddrinfo() error." << std::endl;
 		exit(EXIT_FAILURE);
 	}
@@ -66,17 +66,18 @@ void	Server::initServer()
 	int yes=1;
 	status = setsockopt(_socket_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof yes);
 
-	if (status == -1){
+	if (status == -1) {
 		std::cerr << "setsockopt() error." << std::endl;
+		close(_socket_fd);
 		freeaddrinfo(serv_info);
 		exit(EXIT_FAILURE);
 	}
 	
 	status = bind(_socket_fd, serv_info->ai_addr, serv_info->ai_addrlen);
 
-	if (status == -1)
-	{
+	if (status == -1) {
 		std::cerr << "bind() error." << std::endl;
+		close(_socket_fd);
 		freeaddrinfo(serv_info);
 		exit(EXIT_FAILURE);
 	}
@@ -84,11 +85,18 @@ void	Server::initServer()
 	freeaddrinfo(serv_info);
 	status = listen(_socket_fd, _BACKLOG);
 
-	if (status == -1)
-	{
+	if (status == -1) {
+		close(_socket_fd);
 		std::cerr << "listen() error." << std::endl;
 		exit(EXIT_FAILURE);
 	}
+
+	struct pollfd pfd;
+	pfd.fd = _socket_fd;
+	pfd.events = POLLIN;
+	pfd.revents = 0;
+
+	_pollfd_vector.push_back(pfd);
 }
 
 void	Server::acceptClient()
@@ -167,7 +175,7 @@ void	Server::deleteUser(Client *user)
 
 /*	This function doesn't add the new channel into the creator's map.
 	Remember to always call creator's addToChannel() after this call. */
-bool	Server::createChannel(const std::string channel_name, Client *creator)
+bool	Server::createChannel(const std::string& channel_name, Client *creator)
 {
 	if (channel_name.empty() || !creator || !creator->isRegistered())
 		return false;
@@ -210,3 +218,4 @@ bool	Server::userExists(const std::string& nickname) const
 
 	return false;
 }
+
