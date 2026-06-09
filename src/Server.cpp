@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/08 17:40:39 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/09 18:26:23 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,17 +113,20 @@ void	Server::acceptClient()
 
 void	Server::addClient(const std::string& ip, const std::string& port, int client_fd)
 {	
-	if (ip.empty() || port.empty() || !client_fd || client_fd == -1)
+	if (ip.empty() || port.empty() || client_fd == -1)
 		return ;
 
-	Client	new_client;
+	Client&	new_client = _client_map[client_fd];
 	new_client.initClient(ip, port, client_fd); // init returns bool, might put a condition to check
-	_client_map[client_fd] = new_client;
-	
-	// add to poll() array
+
+	struct pollfd	pfd;
+	pfd.fd = client_fd;
+	pfd.events = POLLIN;
+	pfd.revents = 0;
+	_pollfd_vector.push_back(pfd);
 }
 
-int	Server::getClientFd(std::string nickname) const
+int	Server::getClientFd(const std::string& nickname) const
 {
 	if (nickname.empty())
 		return (-1);
@@ -136,7 +139,7 @@ int	Server::getClientFd(std::string nickname) const
 	return (-1);
 }
 
-Channel*	Server::getChannel(std::string channel_name)
+Channel*	Server::getChannel(const std::string& channel_name)
 {
 	if (channel_name.empty() || !_channel_map.count(channel_name))
 		return NULL;
@@ -144,7 +147,7 @@ Channel*	Server::getChannel(std::string channel_name)
 	return &_channel_map[channel_name];
 }
 
-bool	Server::deleteChannel(std::string channel_name)
+bool	Server::deleteChannel(const std::string& channel_name)
 {
 	if (channel_name.empty() || !_channel_map.count(channel_name))
 		return false;
