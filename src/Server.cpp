@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/09 22:24:47 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/11 15:14:24 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -170,7 +170,7 @@ bool	Server::deleteChannel(const std::string& channel_name)
 	return true;
 }
 
-void	Server::deleteUser(Client *user)
+void	Server::disconnectClient(Client *user)
 {
 	if (!userExists(user->getNickname()))
 		return ;

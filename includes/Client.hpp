@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:08 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/11 13:26:09 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/11 14:44:53 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,7 @@ public:
 	bool				setUsername(const std::string& username);
 	bool				setRealname(const std::string& realname);
 	bool				disconnectChannel(Channel *channel);
+	std::string			handlePartialBuffer();
 };
 
 #endif

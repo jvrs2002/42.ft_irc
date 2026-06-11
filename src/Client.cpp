@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:06 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/11 13:29:04 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/11 14:59:17 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -182,4 +182,19 @@ bool	Client::disconnectChannel(Channel *channel)
 
 	_channels.erase(channel);
 	return true;
+}
+
+std::string	Client::handlePartialBuffer()
+{
+	if (_buffer.empty())
+		return "";
+	
+	std::string::size_type delim = _buffer.find("\r\n");
+
+	if (delim == std::string::npos)
+		return "";
+
+	std::string	substr_buffer = _buffer.substr(0, delim);
+	_buffer.erase(0, delim + 2);
+	return substr_buffer;
 }

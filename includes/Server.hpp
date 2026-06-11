@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:25 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/09 20:51:19 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/11 15:14:24 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ public:
 	int			getClientFd(const std::string& nickname) const;
 	Channel*	getChannel(const std::string& channel_name);
 	bool		deleteChannel(const std::string& channel_name);
-	void		deleteUser(Client *user);
+	void		disconnectClient(Client *user);
 	void		shutdownServer(int error_code);
 	bool		isRunning();
 	int			getErrorCode();
