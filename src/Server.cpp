@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/11 15:14:24 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/12 17:51:56 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -210,11 +210,6 @@ void	Server::shutdownServer(int error_code)
 	_error_code = error_code;
 }
 
-bool	Server::isRunning()
-{
-	return _running;
-}
-
 int	Server::getErrorCode()
 {
 	return _error_code;
@@ -233,3 +228,43 @@ bool	Server::userExists(const std::string& nickname) const
 	return false;
 }
 
+void	Server::run()
+{
+	int	events_count;
+
+	while (_running == true && _socket_fd != -1 && !_pollfd_vector.empty() &&
+	_pollfd_vector[0].fd == _socket_fd) {
+		events_count = poll(&_pollfd_vector[0], _pollfd_vector.size(), -1);
+		if (events_count == -1) {
+			if (errno == EINTR) // pay attention and explain it
+				continue ;
+			shutdownServer(EXIT_FAILURE);
+			return ;
+		}
+		if (events_count == 0)
+			continue ;
+		processEvents(events_count);
+	}
+}
+
+void	Server::processEvents(int events_count)
+{
+	int	i = 0;
+
+	if (events_count == 0)
+		return ;
+	
+	while (events_count > 0 && i < _pollfd_vector.size())
+	{
+		if (_pollfd_vector[i].revents == POLLIN) {
+			// _client_map[_pollfd_vector[i]]
+			events_count--; // decrement only if there's an actual event
+		}
+		i++;
+	}
+
+	if (events_count != 0) {
+		std::cerr << "events_count error" << std::endl;
+		shutdownServer(42); // only to debug possible _pollfd_vector management errors
+	}
+}

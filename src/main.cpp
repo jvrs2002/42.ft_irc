@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:57:59 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/11 16:36:13 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/12 17:52:29 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 
 int	main(int argc, char *argv[])
 {
-	if (argc != 3 || !isValidInput(argv[1], argv[2])) {
+	if (argc != 3 || !isValidInput(argv[1], argv[2])) { // still need to ask for this function
 		std::cerr << "Usage: ./ircserv <port> <password>" << std::endl;
 		return 1;
 	}

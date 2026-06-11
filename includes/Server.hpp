@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:25 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/11 15:14:24 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/11 17:05:52 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,15 +66,10 @@ public:
 	bool		deleteChannel(const std::string& channel_name);
 	void		disconnectClient(Client *user);
 	void		shutdownServer(int error_code);
-	bool		isRunning();
 	int			getErrorCode();
 	bool		userExists(const std::string& nickname) const;
-};
-
-struct pollfd {
-	int		fd;
-	short	events;
-	short	revents;
+	void		run();
+	void		processEvents(int events_count);
 };
 
 #endif
