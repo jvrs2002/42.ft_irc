@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:08 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/09 12:10:31 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/11 13:26:09 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@
 # include <unistd.h>
 # include <fcntl.h>
 # include <set>
+#include <errno.h>
 
 class Channel;
 
@@ -36,7 +37,7 @@ private:
 	bool	_authenticated;
 	bool	_registered;
 
-	std::set<Channel*> _channels; // stores channels pointers, maximum 10 channels per user
+	std::set<Channel*> _channels;	// stores channels pointers, maximum 10 channels per user
 
 	std::string	_ip;
 	std::string	_port;
@@ -45,12 +46,19 @@ private:
 
 	std::string	_buffer;
 public:
+	enum RecvReturn{
+			RECV_SUCCESS,	// read success
+			RECV_EOF,		// user disconnected
+			RECV_ERROR		// read error
+		};
+
 	Client();
 	Client(const std::string& ip, const std::string&, int fd);
 	~Client();
+
 	bool				initClient(const std::string& ip, const std::string& port, int fd);
 	bool				addToChannel(Channel* channel);
-	bool				receiveBuffer();
+	RecvReturn			receiveBuffer();
 	bool				isRegistered() const;
 	bool				isAuthenticated() const;
 	bool				setRegistered();
