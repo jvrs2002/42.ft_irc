@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/12 17:51:56 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/13 14:43:02 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -249,16 +249,34 @@ void	Server::run()
 
 void	Server::processEvents(int events_count)
 {
-	int	i = 0;
+	size_t	i = 0;
+	int	status = 0;
+	Client	*active_client;
+	std::string	command;
+
 
 	if (events_count == 0)
 		return ;
 	
-	while (events_count > 0 && i < _pollfd_vector.size())
-	{
+	while (events_count > 0 && i < _pollfd_vector.size()) {
 		if (_pollfd_vector[i].revents == POLLIN) {
-			// _client_map[_pollfd_vector[i]]
-			events_count--; // decrement only if there's an actual event
+			active_client = getClientInstance(_pollfd_vector[i].fd);
+			if(active_client) {
+				status = active_client->receiveBuffer();
+				if (status == Client::RecvReturn::RECV_EOF) {
+					disconnectClient(active_client);
+					events_count--;
+					continue ;
+				}
+				else {
+					command = active_client->handlePartialBuffer();
+					while (!command.empty()) { // if empty it's still not ready to be read
+						command_handler.Commandhandler(command, active_client, this); // ask to build Message constructor with const &string
+						command = active_client->handlePartialBuffer();
+					}
+				}
+				events_count--;
+			}
 		}
 		i++;
 	}
@@ -267,4 +285,15 @@ void	Server::processEvents(int events_count)
 		std::cerr << "events_count error" << std::endl;
 		shutdownServer(42); // only to debug possible _pollfd_vector management errors
 	}
+}
+
+Client* Server::getClientInstance(int client_fd)
+{
+	std::map<int, Client>::iterator it = _client_map.find(client_fd);
+
+	if (it == _client_map.end()) {
+		return NULL;
+	}
+
+	return &(it->second);
 }
