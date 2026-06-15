@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/15 10:31:12 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/15 17:50:44 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -271,7 +271,8 @@ void	Server::processEvents(int events_count)
 				else {
 					command = active_client->handlePartialBuffer();
 					while (!command.empty()) { // if empty it's still not ready to be read
-						command_handler.Commandhandler(command, active_client, this); // ask to build Message constructor with const &string and Client
+						Message	msg(active_client, command); // ask to build Message constructor with const &string and Client
+						command_handler.Commandhandler(msg, active_client, this);
 						command = active_client->handlePartialBuffer();
 					}
 				}
