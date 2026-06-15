@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:03 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/09 11:57:34 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/15 18:44:52 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,20 +42,33 @@ private:
 		
 public:
 	Channel();
-	Channel(const std::string channel_name, Client* creator);
+	Channel(const std::string& channel_name, Client* creator);
 	Channel(const Channel& other);
 	Channel& operator=(const Channel &other);
 	~Channel();
 
+	void	init(const std::string& channel_name, Client *creator);
 	std::string getName() const;
+	std::string	getTopic() const;
 	// bool	getInvited() const;
 	bool	hasUser(Client *user) const;
+	bool	hasTopic();
 	bool	emptyChannel() const;
+	bool	isOperator(Client *user);
 
 	void	joinChannel(std::string prefix, Client* new_user, std::string password, std::string server_name);
 	void	partChannel(std::string prefix, Client* user_delete, std::string reason);
+	void	setTopicText(std::string prefix, Client* user, std::string topic, std::string server_name);
 	void	ChannelMessage(std::string prefix, Client* sender, std::string command, std::string buffer);
+	void	ChannelBroadcast(std::string prefix, Client* sender, std::string command, std::string buffer);
+	void	ModeBroadcast(std::string prefix, Client* sender, std::string command, std::string buffer);
 	void	removeUser(Client *user);
+
+	void	setInvite(char c, std::string prefix, Client* user);
+	void	setTopic(char c, std::string prefix, Client* user);
+	void	setPassword(char c, std::string password, std::string prefix, Client* user); 
+	void	setOperator(char sign, std::string nickname, std::string prefix, Client* user);
+	void	setLimit(char sign, int max_size, std::string prefix, Client* user);
 	
 };
 
