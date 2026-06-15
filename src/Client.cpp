@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:06 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/11 14:59:17 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/15 15:35:43 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ Client::RecvReturn	Client::receiveBuffer()
 		return RECV_EOF;
 	
 	if (bytes_received < 0)
-			return RECV_ERROR;
+		return RECV_ERROR;
 
 	temp_buffer[bytes_received] = '\0';
 	_buffer.append(temp_buffer);

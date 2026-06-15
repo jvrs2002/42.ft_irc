@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/13 14:43:02 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/15 10:31:12 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ void	Server::initServer()
 		exit(EXIT_FAILURE);
 	}
 
-	int yes=1;
+	int	yes = 1;
 	status = setsockopt(_socket_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof yes);
 
 	if (status == -1) {
@@ -126,9 +126,8 @@ void	Server::addClient(const std::string& ip, const std::string& port, int clien
 
 	Client&	new_client = _client_map[client_fd];
 	
-	if (new_client.initClient(ip, port, client_fd) == -1) {
-		// remove newly created Client from map and close fd
-	}
+	if (new_client.initClient(ip, port, client_fd) == -1)
+		disconnectClient(&new_client);
 
 	struct pollfd	pfd;
 	pfd.fd = client_fd;
@@ -197,7 +196,7 @@ bool	Server::createChannel(const std::string& channel_name, Client *creator)
 	if (_channel_map.find(channel_name) != _channel_map.end())
 		return false;
 
-	Channel	new_channel(channel_name, creator);
+	Channel	new_channel(channel_name, creator); // ERROR: ask to build a default constructor with an init function inside it
 	creator->addToChannel(&new_channel);
 	_channel_map[channel_name] = new_channel;
 	return true;
@@ -228,6 +227,7 @@ bool	Server::userExists(const std::string& nickname) const
 	return false;
 }
 
+// will run as long as _running is true. will stop with shutdownServer() function
 void	Server::run()
 {
 	int	events_count;
@@ -271,7 +271,7 @@ void	Server::processEvents(int events_count)
 				else {
 					command = active_client->handlePartialBuffer();
 					while (!command.empty()) { // if empty it's still not ready to be read
-						command_handler.Commandhandler(command, active_client, this); // ask to build Message constructor with const &string
+						command_handler.Commandhandler(command, active_client, this); // ask to build Message constructor with const &string and Client
 						command = active_client->handlePartialBuffer();
 					}
 				}
@@ -283,7 +283,7 @@ void	Server::processEvents(int events_count)
 
 	if (events_count != 0) {
 		std::cerr << "events_count error" << std::endl;
-		shutdownServer(42); // only to debug possible _pollfd_vector management errors
+		shutdownServer(42); // debug possible _pollfd_vector management errors
 	}
 }
 
