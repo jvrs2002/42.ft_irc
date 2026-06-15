@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
+/*   By: manelcarvalho <manelcarvalho@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:03 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/09 11:57:34 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/12 12:04:18 by manelcarval      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,8 @@ public:
 	// bool	getInvited() const;
 	bool	hasUser(Client *user) const;
 	bool	emptyChannel() const;
+	bool	isOperator(Client *user);
+	
 
 	void	joinChannel(std::string prefix, Client* new_user, std::string password, std::string server_name);
 	void	partChannel(std::string prefix, Client* user_delete, std::string reason);
@@ -58,8 +60,12 @@ public:
 	void	ChannelBroadcast(std::string prefix, Client* sender, std::string command, std::string buffer);
 	void	removeUser(Client *user);
 
-	void	setInvite(char c);
-	void	setTopic(char c);
+	void	setInvite(char c, std::string prefix, Client* user);
+	void	setTopic(char c, std::string prefix, Client* user);
+	void	setPassword(char c, std::string password, std::string prefix, Client* user); 
+	void	setOperator(char sign, std::string nickname, std::string prefix, Client* user);
+	void	setSize(char sign, int max_size, std::string prefix, Client* user);
+	
 };
 
 

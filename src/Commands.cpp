@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ppassos <ppassos@student.42.fr>            +#+  +:+       +#+        */
+/*   By: manelcarvalho <manelcarvalho@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:11 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/02 19:03:49 by ppassos          ###   ########.fr       */
+/*   Updated: 2026/06/12 15:30:30 by manelcarval      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -237,16 +237,6 @@ void Commands::mode_handler(Message msg, Client* user, Server* server)
 	}
 	std::string channel_name = params[0];
 	std::string modestring = params[1];
-	
-	// test
-	int k = params.size() - 2;
-	std::string args[k];
-	while (k > 0)
-	{
-		args[k] = params[k];
-		k--;
-	}
-	k = 0;
 	Channel* channel = server->getChannel(channel_name);
 	// std::string args = params[2];
 
@@ -254,35 +244,48 @@ void Commands::mode_handler(Message msg, Client* user, Server* server)
 	// for (int i = 0; i < number_of_args; i++); {
 	// 	_mode_functions[i] (args[i]);
 	// }
-
+	if (!channel->isOperator(user))
+	{
+		sendReply(user->getClientFd(), server->NAME, "482", user->getNickname(), "MODE", "You're not a channel operator");
+		return ;
+	}
 	char sign;
-	std::string nickname;
-	std::string max_size;
 	int arg_index = 2;
-	for (int i = 0; modestring[i] != NULL; i++) {
+	std::string password = "";
+	std::string nickname = "";
+	int max_size = 0;
+	for (int i = 0; modestring[i] != '\0'; i++) {
 		if (modestring[i] == '+' || modestring[i] == '-')
 			sign = modestring[i++];
 		switch (modestring[i])
 		{
 			case 'i':
-				channel->setInvite(sign);
-				channel->ChannelBroadcast(msg.getPrefix(), user, " MODE ", sign + "i");
+				channel->setInvite(sign, msg.getPrefix(), user);
 				break;
 			case 't':
-				channel->setTopic(sign);
-				channel->ChannelBroadcast(msg.getPrefix(), user, " MODE ", sign + "t");
+				channel->setTopic(sign, msg.getPrefix(), user);
 				break;
 			case 'k':
-				if (arg_index < (int)params.size())
-					std::string password = params[arg_index++];
+				if (arg_index < (int)params.size() && sign == '+') {
+					password = params[arg_index++];
+					channel->setPassword(sign, password, msg.getPrefix(), user);
+				}
+				else
+					channel->setPassword(sign, password, msg.getPrefix(), user);
 				break;
 			case 'o':
-				nickname = args[k];
-				k++;
+				if (arg_index < (int)params.size()){
+					nickname = params[arg_index++];
+					channel->setOperator(sign, nickname, msg.getPrefix(), user);
+				}
 				break;
-			case 'l':
-				max_size = args[k];
-				k++;
+			case 'l':				
+				if (arg_index < (int)params.size() && sign == '+') {
+					max_size = atoi(params[arg_index++].c_str());
+					channel->setSize(sign, max_size, msg.getPrefix(), user);
+				}
+				else 
+					channel->setSize(sign, max_size, msg.getPrefix(), user);
 				break;
 			
 			default:

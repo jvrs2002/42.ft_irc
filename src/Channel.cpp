@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
+/*   By: manelcarvalho <manelcarvalho@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:51 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/09 12:17:48 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/12 12:05:44 by manelcarval      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,27 +14,12 @@
 #include "Client.hpp"
 #include "Utils.hpp"
 
-void	Channel::setInvite(char c) {
-	if (c == '+')
-		_invite_active = true;
-	else 
-		_invite_active = false;
-}
-
-void	Channel::setTopic(char c) {
-	if (c == '+')
-		_topic_active = true;
-	else
-		_topic_active = false;
-		
-}
-
 /* :nick!user@host JOIN :#channel
 :server 331 nick #channel :No topic is set
 :server 353 nick = #channel :@nick* 
 :server 366 nick #channel :End of /NAMES list */
 
-void Channel::joinChannel(std::string prefix, Client *new_user, std::string password, std::string server_name) 
+void	Channel::joinChannel(std::string prefix, Client *new_user, std::string password, std::string server_name) 
 {
 	if (_password_active && _password != password)
 	{
@@ -74,7 +59,7 @@ void Channel::joinChannel(std::string prefix, Client *new_user, std::string pass
 	sendReply(new_user->getClientFd(), server_name, "366", new_user->getNickname(), _channel_name, "End of /NAMES list");
 }
 
-void Channel::partChannel(std::string prefix, Client *user_delete, std::string reason) {
+void	Channel::partChannel(std::string prefix, Client *user_delete, std::string reason) {
 	
 	std::string part_msg = prefix + " PART " + _channel_name + " :" + reason + "\r\n";
 	for (std::set<Client*>::iterator it = _users.begin(); it != _users.end(); it++)
@@ -86,7 +71,62 @@ void Channel::partChannel(std::string prefix, Client *user_delete, std::string r
 	user_delete->disconnectChannel(this);
 }
 
-void Channel::ChannelMessage(std::string prefix, Client *sender, std::string command, std::string buffer) {
+void	Channel::setInvite(char sign, std::string prefix, Client* user) {
+	if (sign == '+')
+		_invite_active = true;
+	else 
+		_invite_active = false;
+	this->ChannelBroadcast(prefix, user, " MODE ", sign + "i");
+}
+
+void	Channel::setTopic(char sign, std::string prefix, Client* user) {
+	if (sign == '+')
+		_topic_active = true;
+	else
+		_topic_active = false;
+	this->ChannelBroadcast(prefix, user, " MODE ", sign + "t");	
+}
+
+void	Channel::setPassword(char sign, std::string password, std::string prefix, Client* user) 
+{
+	if (sign == '+') 
+		_password_active = true;
+	else
+		_password_active = false;
+	_password = password;
+	this->ChannelBroadcast(prefix, user, " MODE ", sign + "k " + password);
+}
+
+void	Channel::setOperator(char sign, std::string nickname, std::string prefix, Client* user)
+{
+	Client *tmp;
+	for (std::set<Client *>::iterator it = _users.begin(); it != _users.end(); it++ )
+	{
+		if (nickname == (*it)->getNickname()) {
+			tmp = *it;
+			break;
+		}
+	}
+	if (sign == '+' && _users.count(tmp))
+		_operators.insert(tmp);
+	else if (sign == '-' && _operators.count(tmp))
+		_operators.erase(tmp);
+	else 
+	 // return error
+	this->ChannelBroadcast(prefix, user, " MODE ", sign + "o " + nickname);
+}
+
+void	Channel::setSize(char sign, int max_size, std::string prefix, Client* user) {
+	if (sign == '+')
+	{
+		_user_limit_active = true;
+		_user_limit = max_size;
+	}
+	else if (sign == '-')
+		_user_limit_active = false;
+}
+
+void	Channel::ChannelMessage(std::string prefix, Client *sender, std::string command, std::string buffer) {
 	std::string msg = prefix + command + _channel_name + " :" + buffer + "\r\n";
 	for (std::set<Client*>::iterator it = _users.begin(); it != _users.end(); it++) {
 		if (sender->getClientFd() == (*it)->getClientFd())
@@ -95,7 +135,7 @@ void Channel::ChannelMessage(std::string prefix, Client *sender, std::string com
 	}
 }
 
-void Channel::ChannelBroadcast(std::string prefix, Client *sender, std::string command, std::string buffer) {
+void	Channel::ChannelBroadcast(std::string prefix, Client *sender, std::string command, std::string buffer) {
 	std::string msg = prefix + command + _channel_name + buffer + "\r\n";
 	for (std::set<Client*>::iterator it = _users.begin(); it != _users.end(); it++)
 		send((*it)->getClientFd(), msg.c_str(), msg.size(), 0);
@@ -120,6 +160,10 @@ void	Channel::removeUser(Client *user)
 
 	if (_operators.count(user))
 		_operators.erase(user);
+}
+
+bool	Channel::isOperator(Client *user) {
+	return (_operators.count(user));
 }
 
 Channel::Channel(){}
