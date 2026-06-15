@@ -20,6 +20,7 @@ Commands::Commands()
 	_handler["PRIVMSG"] = &privmsg_handler;
 	_handler["NOTICE"] = &notice_handler;
 	_handler["MODE"] = &mode_handler;
+	_handler["TOPIC"] = &topic_handler;
 	_handler["PASS"] = &pass_handler;
 	_handler["USER"] = &user_handler;
 	//_handler["NICK"] = &nick_handler;   por terminar
@@ -244,12 +245,17 @@ void Commands::mode_handler(Message msg, Client* user, Server* server)
 	// for (int i = 0; i < number_of_args; i++); {
 	// 	_mode_functions[i] (args[i]);
 	// }
+	if (!channel)
+	{
+    sendReply(user->getClientFd(), server->NAME, "403", user->getNickname(), channel_name, "No such channel");
+    return;
+	}
 	if (!channel->isOperator(user))
 	{
-		sendReply(user->getClientFd(), server->NAME, "482", user->getNickname(), "MODE", "You're not a channel operator");
+		sendReply(user->getClientFd(), server->NAME, "482", user->getNickname(), channel_name, "You're not a channel operator");
 		return ;
 	}
-	char sign;
+	char sign = '+';
 	int arg_index = 2;
 	std::string password = "";
 	std::string nickname = "";
@@ -270,11 +276,11 @@ void Commands::mode_handler(Message msg, Client* user, Server* server)
 					password = params[arg_index++];
 					channel->setPassword(sign, password, msg.getPrefix(), user);
 				}
-				else
+				else if (sign == '-')
 					channel->setPassword(sign, password, msg.getPrefix(), user);
 				break;
 			case 'o':
-				if (arg_index < (int)params.size()){
+				if (arg_index < (int)params.size()) {
 					nickname = params[arg_index++];
 					channel->setOperator(sign, nickname, msg.getPrefix(), user);
 				}
@@ -282,19 +288,42 @@ void Commands::mode_handler(Message msg, Client* user, Server* server)
 			case 'l':				
 				if (arg_index < (int)params.size() && sign == '+') {
 					max_size = atoi(params[arg_index++].c_str());
-					channel->setSize(sign, max_size, msg.getPrefix(), user);
+					channel->setLimit(sign, max_size, msg.getPrefix(), user);
 				}
-				else 
-					channel->setSize(sign, max_size, msg.getPrefix(), user);
+				else if (sign == '-')
+					channel->setLimit(sign, max_size, msg.getPrefix(), user);
 				break;
-			
 			default:
 				break;
 		}
 	}
 }
 
-
+void	Commands::topic_handler(Message msg, Client* user, Server* server)
+{
+	if (!user->isRegistered()){
+		sendReply(user->getClientFd(), server->NAME, "451", user->getNickname(), "", "You have not registered");
+		return ;
+	}
+	std::vector<std::string> params = msg.getParams();
+	if (params.empty())
+	{
+		sendReply(user->getClientFd(), server->NAME, "461", user->getNickname(), "TOPIC", "Not enough parameters");
+		return ;
+	}
+	std::string channel_name = params[0];
+	Channel *channel = server->getChannel(channel_name);
+	if (params.size() < 2)
+	{
+		if(channel->hasTopic())
+			sendReply(user->getClientFd(), server->NAME, "332", user->getNickname(), channel_name, channel->getTopic());
+		else
+			sendReply(user->getClientFd(), server->NAME, "331", user->getNickname(), channel_name, "No Topic is set");
+		return ;
+	}
+	std::string topic = params[1];
+	channel->setTopicText(msg.getPrefix(), user, topic, server->NAME);
+}
 
 //protocolist work(on going)
 

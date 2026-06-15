@@ -40,6 +40,7 @@ private:
 		static void user_handler(Message msg, Client* user, Server* server);
 		//static void nick_handler(Message msg, Client* user, Server* server);
 		static void mode_handler(Message msg, Client* user, Server* server);	
+		static void topic_handler(Message msg, Client* user, Server* server);	
 
 		
 		typedef void (*PFnCommandHandler)(Message, Client*, Server*);
