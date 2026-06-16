@@ -55,14 +55,17 @@ public:
 	bool	hasTopic();
 	bool	emptyChannel() const;
 	bool	isOperator(Client *user);
-
+	
 	void	joinChannel(std::string prefix, Client* new_user, std::string password, std::string server_name);
 	void	partChannel(std::string prefix, Client* user_delete, std::string reason);
 	void	setTopicText(std::string prefix, Client* user, std::string topic, std::string server_name);
+	void	kickUser(std::string prefix, Client* target, std::string reason);
 	void	ChannelMessage(std::string prefix, Client* sender, std::string command, std::string buffer);
 	void	ChannelBroadcast(std::string prefix, Client* sender, std::string command, std::string buffer);
 	void	ModeBroadcast(std::string prefix, Client* sender, std::string command, std::string buffer);
 	void	removeUser(Client *user);
+
+
 
 	void	setInvite(char c, std::string prefix, Client* user);
 	void	setTopic(char c, std::string prefix, Client* user);
@@ -70,6 +73,7 @@ public:
 	void	setOperator(char sign, std::string nickname, std::string prefix, Client* user);
 	void	setLimit(char sign, int max_size, std::string prefix, Client* user);
 	
+
 };
 
 

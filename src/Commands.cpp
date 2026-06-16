@@ -21,6 +21,7 @@ Commands::Commands()
 	_handler["NOTICE"] = &notice_handler;
 	_handler["MODE"] = &mode_handler;
 	_handler["TOPIC"] = &topic_handler;
+	_handler["KICK"] = &kick_handler;
 	_handler["PASS"] = &pass_handler;
 	_handler["USER"] = &user_handler;
 	//_handler["NICK"] = &nick_handler;   por terminar
@@ -323,6 +324,56 @@ void	Commands::topic_handler(Message msg, Client* user, Server* server)
 	}
 	std::string topic = params[1];
 	channel->setTopicText(msg.getPrefix(), user, topic, server->NAME);
+}
+
+void	Commands::kick_handler(Message msg, Client* user, Server* server)
+{
+	if (!user->isRegistered()){
+		sendReply(user->getClientFd(), server->NAME, "451", user->getNickname(), "", "You have not registered");
+		return ;
+	}
+	std::vector<std::string> params = msg.getParams();
+	if (params.size() < 2)
+	{
+		sendReply(user->getClientFd(), server->NAME, "461", user->getNickname(), "MODE", "Not enough parameters");
+		return ;
+	}
+	std::string channel_name = params[0];
+    std::string target_nick = params[1];
+    std::string reason = (params.size() > 2) ? params[2] : user->getNickname();
+	Channel* channel = server->getChannel(channel_name);
+	if (!channel) 
+	{
+		sendReply(user->getClientFd(), server->NAME, "403", user->getNickname(), channel_name, "No such channel");
+		return;
+	}
+	if (!channel->hasUser(user))
+	{
+		sendReply(user->getClientFd(), server->NAME, "442", user->getNickname(), channel_name, "You're not on that channel");
+		return;
+	}
+	if (!channel->isOperator(user))
+	{
+		sendReply(user->getClientFd(), server->NAME, "482", user->getNickname(), channel_name, "You're not channel operator");
+		return;
+	}
+	int target_fd = server->getClientFd(target_nick);
+	Client* target = server->getClientInstance(target_fd);
+
+	if (!target)
+	{
+		sendReply(user->getClientFd(), server->NAME, "401", user->getNickname(), target_nick, "No such nick");
+		return;
+	}
+	if (!channel->hasUser(target))
+	{
+		sendReply(user->getClientFd(), server->NAME, "441", user->getNickname(), target_nick, "They aren't on that channel");
+		return;
+	}
+
+	channel->kickUser(msg.getPrefix(), target, reason);
+
+
 }
 
 //protocolist work(on going)
