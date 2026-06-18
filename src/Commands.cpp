@@ -6,7 +6,7 @@
 /*   By: manelcarvalho <manelcarvalho@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:11 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/12 15:30:30 by manelcarval      ###   ########.fr       */
+/*   Updated: 2026/06/18 12:15:00 by manelcarval      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ Commands::Commands()
 	_handler["MODE"] = &mode_handler;
 	_handler["TOPIC"] = &topic_handler;
 	_handler["KICK"] = &kick_handler;
+	_handler["INVITE"] = &invite_handler;
 	_handler["PASS"] = &pass_handler;
 	_handler["USER"] = &user_handler;
 	//_handler["NICK"] = &nick_handler;   por terminar
@@ -240,16 +241,10 @@ void Commands::mode_handler(Message msg, Client* user, Server* server)
 	std::string channel_name = params[0];
 	std::string modestring = params[1];
 	Channel* channel = server->getChannel(channel_name);
-	// std::string args = params[2];
-
-	// char **args[number_of_args] = handle_args(std::string modestring);
-	// for (int i = 0; i < number_of_args; i++); {
-	// 	_mode_functions[i] (args[i]);
-	// }
 	if (!channel)
 	{
-    sendReply(user->getClientFd(), server->NAME, "403", user->getNickname(), channel_name, "No such channel");
-    return;
+		sendReply(user->getClientFd(), server->NAME, "403", user->getNickname(), channel_name, "No such channel");
+		return;
 	}
 	if (!channel->isOperator(user))
 	{
@@ -339,8 +334,8 @@ void	Commands::kick_handler(Message msg, Client* user, Server* server)
 		return ;
 	}
 	std::string channel_name = params[0];
-    std::string target_nick = params[1];
-    std::string reason = (params.size() > 2) ? params[2] : user->getNickname();
+	std::string target_nick = params[1];
+	std::string reason = (params.size() > 2) ? params[2] : user->getNickname();
 	Channel* channel = server->getChannel(channel_name);
 	if (!channel) 
 	{
@@ -357,23 +352,68 @@ void	Commands::kick_handler(Message msg, Client* user, Server* server)
 		sendReply(user->getClientFd(), server->NAME, "482", user->getNickname(), channel_name, "You're not channel operator");
 		return;
 	}
+	
 	int target_fd = server->getClientFd(target_nick);
-	Client* target = server->getClientInstance(target_fd);
-
-	if (!target)
+	if (target_fd == -1)
 	{
 		sendReply(user->getClientFd(), server->NAME, "401", user->getNickname(), target_nick, "No such nick");
 		return;
 	}
+	
+	Client* target = server->getClientInstance(target_fd);
 	if (!channel->hasUser(target))
 	{
 		sendReply(user->getClientFd(), server->NAME, "441", user->getNickname(), target_nick, "They aren't on that channel");
 		return;
 	}
-
 	channel->kickUser(msg.getPrefix(), target, reason);
+}
 
+void Commands::invite_handler(Message msg, Client* user, Server* server)
+{
+	if (!user->isRegistered()){
+		sendReply(user->getClientFd(), server->NAME, "451", user->getNickname(), "", "You have not registered");
+		return ;
+	}
+	std::vector<std::string> params = msg.getParams();
+	if (params.size() < 2)
+	{
+		sendReply(user->getClientFd(), server->NAME, "461", user->getNickname(), "MODE", "Not enough parameters");
+		return ;
+	}
+	std::string target_nick = params[0];
+	std::string channel_name = params[1];
+	Channel* channel = server->getChannel(channel_name);
+	if (!channel) 
+	{
+		sendReply(user->getClientFd(), server->NAME, "403", user->getNickname(), channel_name, "No such channel");
+		return;
+	}
+	if (!channel->hasUser(user))
+	{
+		sendReply(user->getClientFd(), server->NAME, "442", user->getNickname(), channel_name, "You're not on that channel");
+		return;
+	}
+	if (!channel->isOperator(user))
+	{
+		sendReply(user->getClientFd(), server->NAME, "482", user->getNickname(), channel_name, "You're not channel operator");
+		return;
+	}
 
+	int target_fd = server->getClientFd(target_nick);
+	if (target_fd == -1)
+	{
+		sendReply(user->getClientFd(), server->NAME, "401", user->getNickname(), target_nick, "No such nick");
+		return;
+	}
+	
+	Client* target = server->getClientInstance(target_fd);
+	if (!channel->hasUser(target))
+	{
+		sendReply(user->getClientFd(), server->NAME, "441", user->getNickname(), target_nick, "They aren't on that channel");
+		return;
+	}
+	
 }
 
 //protocolist work(on going)
