@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:25 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/19 13:26:37 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/19 14:44:08 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,7 @@ public:
 	bool		userExists(const std::string& nickname) const;
 	void		run();
 	void		processEvents(int events_count);
+	bool		authenticate(const std::string& user_pass, Client *user);
 };
 
 #endif

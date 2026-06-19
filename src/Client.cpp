@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:06 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/15 18:44:42 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/19 15:21:13 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,6 +139,7 @@ bool	Client::setRegistered()
 	return true;
 }
 
+// only to be used within authenticate()
 void	Client::setAuthenticated()
 {
 	_authenticated = true;

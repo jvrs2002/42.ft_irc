@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/19 14:29:20 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/19 15:21:59 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -298,4 +298,17 @@ Client* Server::getClientInstance(int client_fd)
 	}
 
 	return &(it->second);
+}
+
+bool	Server::authenticate(const std::string& user_pass, Client *user)
+{
+	if (!user)
+		return false;
+
+	if (user_pass == _password) {
+		user->setAuthenticated();
+		return true;
+	}
+
+	return false;
 }
