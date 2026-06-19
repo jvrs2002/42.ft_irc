@@ -23,6 +23,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "Client.hpp"
+#include "Utils.hpp"
 
 
 //funcoes que preciso de ti joao:
@@ -69,7 +70,7 @@ public:
 	Message();
 	Message(std::string prefix, std::string command, std::vector<std::string> params);
 	Message(const Message &src);
-	Message(Client *user);
+	Message(Client *user, const std::string& command);
 	Message &operator=(const Message &other);
 	~Message();
 	

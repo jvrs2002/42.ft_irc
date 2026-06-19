@@ -24,21 +24,21 @@ std::string Message::SetPrefix(Client *user)
 {
 	std::string  username = user->getUsername();
 	std::string  nickname = user->getNickname();
-	std::string  ip = user->getip();
+	std::string  ip = user->getClientIP();
 
 	if (username.empty() || nickname.empty() || ip.empty())
 		return("");
 	std::string prefix = ":" + nickname + "!" +username + "@" + ip;
 	return(prefix);
 }
-Message::Message(Client *user) //std::string buffer, std::string ip, int len
+Message::Message(Client *user, const std::string& command)
 {
-	std::string buffer = user->getBuffer();
-	int len = buffer.size();
-	size_t start = buffer.find_first_not_of(" \t");
+	std::string temp = command;
+	int len = temp.size();
+	size_t start = temp.find_first_not_of(" \t");
 	if (start == std::string::npos)
     	return;
-	buffer = buffer.substr(start);
+	temp = temp.substr(start);
 	if (len == 2 ){
 		std::cout << std::endl;
 		return ;
@@ -48,8 +48,8 @@ Message::Message(Client *user) //std::string buffer, std::string ip, int len
 		return ;
 	}
 	this->prefix = SetPrefix(user);
-	this->command = Fillcommand(buffer);
-	this->params = Fillparams(buffer);
+	this->command = Fillcommand(temp);
+	this->params = Fillparams(temp);
 }
 
 Message::Message(std::string prefix, std::string command, std::vector<std::string> params)
