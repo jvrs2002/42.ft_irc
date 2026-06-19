@@ -80,8 +80,19 @@ void	Channel::setTopicText(std::string prefix, Client* user, std::string topic, 
 	}
 	_topic = topic;
 	this->ChannelBroadcast(prefix, user, "TOPIC", _topic);
-
 }
+
+void	Channel::kickUser(std::string prefix, Client* target, std::string reason) 
+{
+	std::string kick_msg = prefix + " KICK " + _channel_name + " " + target->getNickname() + " :" + reason + "\r\n";
+	for (std::set<Client*>::iterator it = _users.begin(); it != _users.end(); it++)
+		send((*it)->getClientFd(), kick_msg.c_str(), kick_msg.size(), 0);
+
+	_operators.erase(target);
+	_users.erase(target);
+	target->disconnectChannel(this);
+}
+
 
 void	Channel::setInvite(char sign, std::string prefix, Client* user) {
 	if (sign == '+')

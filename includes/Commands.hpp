@@ -6,7 +6,7 @@
 /*   By: manelcarvalho <manelcarvalho@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:15 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/01 12:25:57 by manelcarval      ###   ########.fr       */
+/*   Updated: 2026/06/18 12:07:56 by manelcarval      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,9 @@ private:
 		//static void nick_handler(Message msg, Client* user, Server* server);
 		static void mode_handler(Message msg, Client* user, Server* server);	
 		static void topic_handler(Message msg, Client* user, Server* server);	
+		static void kick_handler(Message msg, Client* user, Server* server);
+		static void invite_handler(Message msg, Client* user, Server* server);
+		
 
 		
 		typedef void (*PFnCommandHandler)(Message, Client*, Server*);
