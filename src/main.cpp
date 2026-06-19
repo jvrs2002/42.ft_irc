@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:57:59 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/19 13:10:54 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/19 13:28:57 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,10 @@ int	main(int argc, char *argv[])
 	}
 
 	std::string	port = argv[1];
+	int	size = port.size();
 
-	for (unsigned char c : port) {
+	for (int i = 0; i < size; i++) {
+		unsigned char c = port[i];
 		if (!std::isdigit(c)) {
 			std::cerr << "Error: Invalid port '" << port << "'. Port must be a numeric value." << std::endl;
 			return 1;

@@ -6,11 +6,12 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/15 17:50:44 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/19 14:29:20 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
+#include "Client.hpp"
 
 Server::Server(const std::string& ip, const std::string& port, const std::string& password) :
 	_ip(ip),
@@ -263,7 +264,7 @@ void	Server::processEvents(int events_count)
 			active_client = getClientInstance(_pollfd_vector[i].fd);
 			if(active_client) {
 				status = active_client->receiveBuffer();
-				if (status == Client::RecvReturn::RECV_EOF) {
+				if (status == Client::RECV_EOF) {
 					disconnectClient(active_client);
 					events_count--;
 					continue ;
@@ -272,7 +273,7 @@ void	Server::processEvents(int events_count)
 					command = active_client->handlePartialBuffer();
 					while (!command.empty()) { // if empty it's still not ready to be read
 						Message	msg(active_client, command); // ask to build Message constructor with const &string and Client
-						command_handler.Commandhandler(msg, active_client, this);
+						_command_handler.Commandhandler(msg, active_client, this);
 						command = active_client->handlePartialBuffer();
 					}
 				}

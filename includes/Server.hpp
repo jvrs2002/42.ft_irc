@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:25 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/13 14:23:55 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/19 13:26:37 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ private:
 	std::string						_password;
 	int								_socket_fd;			// server's socket fd
 
-	Commands						command_handler;
+	Commands						_command_handler;
 	std::map<std::string, Channel>	_channel_map;		// each channel is mapped by their name
 	std::map<int, Client>			_client_map;		// each client is mapped by it's socket fd
 	std::vector<struct pollfd>		_pollfd_vector;
