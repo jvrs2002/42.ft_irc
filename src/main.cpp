@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:57:59 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/19 17:10:39 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/22 14:10:22 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,13 +20,10 @@
 Server	*g_server_ptr = NULL;
 
 void sigintHandler(int sig) {
-	std::cout << "Interrupt handle " << sig << std::endl; // change msg and maybe broadcast() also
-
-	if (g_server_ptr == NULL) // before run()'s loop
+	if (g_server_ptr == NULL)
 		exit(sig);
-	else // after run()'s loop
-		g_server_ptr->shutdownServer(EXIT_FAILURE);
-	exit(sig);
+	else
+		g_server_ptr->shutdownServer(sig);
 }
 
 int	main(int argc, char *argv[])
@@ -49,7 +46,8 @@ int	main(int argc, char *argv[])
 
 	std::string	password = argv[2];
 	Server	server("127.0.0.1", std::string(argv[1]), std::string(argv[2]));
-	*g_server_ptr = server;
+	g_server_ptr = &server;
+	std::signal(SIGINT, sigintHandler);
 	server.run();
 	return server.getErrorCode();
 }

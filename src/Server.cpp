@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/19 15:21:59 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/22 14:10:37 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -206,6 +206,7 @@ bool	Server::createChannel(const std::string& channel_name, Client *creator)
 // the main's while loop depends on the _running as a condition
 void	Server::shutdownServer(int error_code)
 {
+	// maybe use broadcast();
 	_running = false;
 	_error_code = error_code;
 }
