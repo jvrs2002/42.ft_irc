@@ -50,7 +50,7 @@ public:
 	void	init(const std::string& channel_name, Client *creator);
 	std::string getName() const;
 	std::string	getTopic() const;
-	// bool	getInvited() const;
+	bool	getInvite() const;
 	bool	hasUser(Client *user) const;
 	bool	hasTopic();
 	bool	emptyChannel() const;
@@ -60,6 +60,7 @@ public:
 	void	partChannel(std::string prefix, Client* user_delete, std::string reason);
 	void	setTopicText(std::string prefix, Client* user, std::string topic, std::string server_name);
 	void	kickUser(std::string prefix, Client* target, std::string reason);
+	void	addInvite(std::string target_nick);
 	void	ChannelMessage(std::string prefix, Client* sender, std::string command, std::string buffer);
 	void	ChannelBroadcast(std::string prefix, Client* sender, std::string command, std::string buffer);
 	void	ModeBroadcast(std::string prefix, Client* sender, std::string command, std::string buffer);
