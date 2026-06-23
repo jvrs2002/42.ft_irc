@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:06 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/09 12:23:14 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/19 15:21:13 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ Client::~Client()
 	std::set<Channel*>::iterator it;
 
 	for (it = _channels.begin(); it != _channels.end(); ++it) {
-			(*it)->removeUser(this); // still need this function
+			(*it)->removeUser(this); // what happens if he's not connected to any?
 	}
 
 	_channels.clear();
@@ -68,25 +68,26 @@ bool	Client::initClient(const std::string& ip, const std::string& port, int fd)
 	maximum allowed for the command and its parameters.
 	
 	This function does not deal with incomplete buffers. */
-bool	Client::receiveBuffer()
+Client::RecvReturn	Client::receiveBuffer()
 {
 	if (_socket_fd == -1)
-		return false;
+		return RECV_ERROR;
 
-	int	bytes_received;
 	char temp_buffer[MAX_IRC_MSG_LEN + 1];
+	int bytes_received = recv(_socket_fd, temp_buffer, MAX_IRC_MSG_LEN, 0);
 
-	bytes_received = recv(_socket_fd, temp_buffer, MAX_IRC_MSG_LEN, 0);
-
-	if (bytes_received <= 0)
-		return false;
+	if (bytes_received == 0)
+		return RECV_EOF;
 	
+	if (bytes_received < 0)
+		return RECV_ERROR;
+
 	temp_buffer[bytes_received] = '\0';
 	_buffer.append(temp_buffer);
-	return true;
+	return RECV_SUCCESS;
 }
 
-bool		Client::addToChannel(Channel* channel)
+bool	Client::addToChannel(Channel* channel)
 {
 	if (!channel || channel->hasUser(this) || !_registered || _channels.size() >= 10)
 		return false;
@@ -138,6 +139,7 @@ bool	Client::setRegistered()
 	return true;
 }
 
+// only to be used within authenticate()
 void	Client::setAuthenticated()
 {
 	_authenticated = true;
@@ -181,4 +183,19 @@ bool	Client::disconnectChannel(Channel *channel)
 
 	_channels.erase(channel);
 	return true;
+}
+
+std::string	Client::handlePartialBuffer()
+{
+	if (_buffer.empty())
+		return "";
+	
+	std::string::size_type delim = _buffer.find("\r\n");
+
+	if (delim == std::string::npos)
+		return "";
+
+	std::string	substr_buffer = _buffer.substr(0, delim);
+	_buffer.erase(0, delim + 2);
+	return substr_buffer;
 }
