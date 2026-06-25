@@ -297,7 +297,8 @@ void Commands::mode_handler(Message msg, Client* user, Server* server)
 
 void	Commands::topic_handler(Message msg, Client* user, Server* server)
 {
-	if (!user->isRegistered()){
+	if (!user->isRegistered())
+	{
 		sendReply(user->getClientFd(), server->NAME, "451", user->getNickname(), "", "You have not registered");
 		return ;
 	}
@@ -309,6 +310,16 @@ void	Commands::topic_handler(Message msg, Client* user, Server* server)
 	}
 	std::string channel_name = params[0];
 	Channel *channel = server->getChannel(channel_name);
+	if (!channel)
+	{
+		sendReply(user->getClientFd(), server->NAME, "403", user->getNickname(), channel_name, "No such channel");
+		return;
+	}
+	if (!channel->hasUser(user)) 
+	{
+		sendReply(user->getClientFd(), server->NAME, "442", user->getNickname(), channel_name, "You're not on that channel");
+		return;
+	}
 	if (params.size() < 2)
 	{
 		if(channel->hasTopic())
@@ -330,7 +341,7 @@ void	Commands::kick_handler(Message msg, Client* user, Server* server)
 	std::vector<std::string> params = msg.getParams();
 	if (params.size() < 2)
 	{
-		sendReply(user->getClientFd(), server->NAME, "461", user->getNickname(), "MODE", "Not enough parameters");
+		sendReply(user->getClientFd(), server->NAME, "461", user->getNickname(), "KICK", "Not enough parameters");
 		return ;
 	}
 	std::string channel_name = params[0];
@@ -367,6 +378,8 @@ void	Commands::kick_handler(Message msg, Client* user, Server* server)
 		return;
 	}
 	channel->kickUser(msg.getPrefix(), target, reason);
+	if (channel->emptyChannel())
+    	server->deleteChannel(channel_name);
 }
 
 void Commands::invite_handler(Message msg, Client* user, Server* server)
@@ -378,7 +391,7 @@ void Commands::invite_handler(Message msg, Client* user, Server* server)
 	std::vector<std::string> params = msg.getParams();
 	if (params.size() < 2)
 	{
-		sendReply(user->getClientFd(), server->NAME, "461", user->getNickname(), "MODE", "Not enough parameters");
+		sendReply(user->getClientFd(), server->NAME, "461", user->getNickname(), "INVITE", "Not enough parameters");
 		return ;
 	}
 	std::string target_nick = params[0];
@@ -394,7 +407,7 @@ void Commands::invite_handler(Message msg, Client* user, Server* server)
 		sendReply(user->getClientFd(), server->NAME, "442", user->getNickname(), channel_name, "You're not on that channel");
 		return;
 	}
-	if (!channel->isOperator(user))
+	if (!channel->isOperator(user) && channel->getInvite())
 	{
 		sendReply(user->getClientFd(), server->NAME, "482", user->getNickname(), channel_name, "You're not channel operator");
 		return;
@@ -408,11 +421,19 @@ void Commands::invite_handler(Message msg, Client* user, Server* server)
 	}
 	
 	Client* target = server->getClientInstance(target_fd);
-	if (!channel->hasUser(target))
-	{
-		sendReply(user->getClientFd(), server->NAME, "441", user->getNickname(), target_nick, "They aren't on that channel");
+	if (channel->hasUser(target)) {
+		sendReply(user->getClientFd(), server->NAME, "443", user->getNickname(), target_nick, "is already on channel");
 		return;
 	}
+
+	channel->addInvite(target_nick);
+
+	sendReply(user->getClientFd(), server->NAME, "341", user->getNickname(), target_nick, channel_name);
+
+
+	std::string invite_msg = msg.getPrefix() + " INVITE " + target_nick + " :" + channel_name + "\r\n";
+	send(target->getClientFd(), invite_msg.c_str(), invite_msg.size(), 0);
+
 	
 }
 

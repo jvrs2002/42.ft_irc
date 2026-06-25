@@ -93,6 +93,11 @@ void	Channel::kickUser(std::string prefix, Client* target, std::string reason)
 	target->disconnectChannel(this);
 }
 
+void	Channel::addInvite(std::string target_nick) 
+{
+	_invited.insert(target_nick);
+}
+
 
 void	Channel::setInvite(char sign, std::string prefix, Client* user) {
 	if (sign == '+')
@@ -149,7 +154,7 @@ void	Channel::setLimit(char sign, int max_size, std::string prefix, Client* user
 	else if (sign == '-')
 	{
 		_user_limit_active = false;
-		this->ModeBroadcast(prefix, user, "MODE", std::string(1, sign) + "l ");
+		this->ModeBroadcast(prefix, user, "MODE", std::string(1, sign) + "l");
 	}
 }
 
@@ -180,6 +185,10 @@ std::string Channel::getName() const {
 
 std::string Channel::getTopic() const {
 	return (this->_topic);
+}
+
+bool	Channel::getInvite() const {
+	return (this->_invite_active);
 }
 
 bool	Channel::hasUser(Client *user) const {
