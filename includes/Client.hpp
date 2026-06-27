@@ -73,6 +73,8 @@ public:
 	bool				setRealname(const std::string& realname);
 	bool				disconnectChannel(Channel *channel);
 	std::string			handlePartialBuffer();
+	void Cbroadcast(const std::string& msg); //extra
+	bool ValidNick(const std::string& nick); //extra
 };
 
 #endif

@@ -267,4 +267,13 @@ Channel& Channel::operator=(const Channel& other) {
 	return *this;
 }
 
+//EXTRA
+const std::set<Client*>& Channel::getUsers() const
+{
+    return _users;
+}
+
+
+//EXTRA
+
 Channel::~Channel() {}

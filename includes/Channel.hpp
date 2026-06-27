@@ -73,7 +73,7 @@ public:
 	void	setPassword(char c, std::string password, std::string prefix, Client* user); 
 	void	setOperator(char sign, std::string nickname, std::string prefix, Client* user);
 	void	setLimit(char sign, int max_size, std::string prefix, Client* user);
-	
+	const std::set<Client*>&getUsers() const; //extra
 
 };
 
