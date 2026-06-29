@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/22 14:10:37 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/28 17:23:55 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,7 +127,7 @@ void	Server::addClient(const std::string& ip, const std::string& port, int clien
 
 	Client&	new_client = _client_map[client_fd];
 	
-	if (new_client.initClient(ip, port, client_fd) == -1)
+	if (new_client.initClient(ip, port, client_fd) == false)
 		disconnectClient(&new_client);
 
 	struct pollfd	pfd;
