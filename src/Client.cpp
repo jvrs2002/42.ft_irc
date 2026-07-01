@@ -236,7 +236,7 @@ bool Client::ValidNick(const std::string& nick)
         return false;
 
     // limite comum
-    if (nick.size() > 9)
+    if (nick.size() < 9)
         return false;
 
     // primeiro char deve ser letra ou alguns símbolos permitidos
