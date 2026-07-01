@@ -464,14 +464,13 @@ void Commands::nick_handler(Message msg, Client* user, Server* server)
 	user->setNickname(params[0]);
 	if (user->isRegistered())
 		user->Cbroadcast(rmsg);//comunicar com  todos os clientes que foi mudado o nick do cliente que esta ligado pelos canais 
-	if (!(user->isRegistered()) && user->hasNick() && user->hasUser() && user->isAuthenticated())
-    	user->setRegistered()
+	if (!(user->isRegistered()) && !user->getNickname().empty() && !user->getUsername().empty() && user->isAuthenticated())
+    	user->setRegistered();
 }
 
 void Commands::pass_handler(Message msg, Client* user, Server* server) 
 {
 	///o get nickname ou user tem de vericar se exite ou nao porque caso nao exista tenho de mandar unknow ou '*' como o nick ou user (if(empty) = '*' || = unknow)
-	std::string password = server->getpassword();//fazer funcao
 	std::vector<std::string> params = msg.getParams();
 	if (user->isAuthenticated()){ //fazer funcao
 		sendReply(user->getClientFd(), server->NAME, "462", user->getNickname(), "PASS", "Already registered"); //independente de estar registrado ou nao, tenho mandar esta mensagem se estiver autenthicado
@@ -483,14 +482,14 @@ void Commands::pass_handler(Message msg, Client* user, Server* server)
 		return ;
 	}
 	std::string params_password = params[0];
-	if (params_password !=  password)
+	if (!server->authenticate(params[0], user))
 	{
 		sendReply(user->getClientFd(), server->NAME, "464", user->getNickname(), "", "Password incorrect");
 		return ;
 	}
 	user->setAuthenticated();	//fazer funcao
-	if (user->hasNick() && user->hasUser() && user->isAuthenticated())
-    	user->setRegistered()
+	if (!user->getNickname().empty() && !user->getUsername().empty() && user->isAuthenticated())
+    	user->setRegistered();
 }
 
 void Commands::user_handler(Message msg, Client* user, Server* server)
@@ -506,10 +505,10 @@ void Commands::user_handler(Message msg, Client* user, Server* server)
 	}
 	user->setUsername(params[0]);
 	user->setRealname(params[3]);
-	if (user->hasNick() && user->hasUser() && user->isAuthenticated())
-    	user->setRegistered()
+	if (!user->getNickname().empty() && !user->getUsername().empty() && user->isAuthenticated())
+    	user->setRegistered();
 }
-//falta as funcoes: hasNick() hasUser() getpassword()
+//falta as funcoes: hasNick() hasUser()
 //ATENCAO!!! -> estado do cliente tem prioridade sobre parsing leve
 //authenticado = password aceite que o user deu ou o sv nao tem pass
 //registrado = com um user valido e um nick porem diferente de todos os presentes
