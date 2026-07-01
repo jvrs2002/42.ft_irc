@@ -46,34 +46,32 @@ public:
 	Channel(const Channel& other);
 	Channel& operator=(const Channel &other);
 	~Channel();
-
 	void	init(const std::string& channel_name, Client *creator);
+
+	void	joinChannel(const std::string& prefix, Client* new_user, const std::string& password, const std::string& server_name);
+	void	partChannel(const std::string& prefix, Client* user_delete, const std::string& reason);
+	void	setTopicText(const std::string& prefix, Client* user, const std::string& topic, const std::string& server_name);
+	void	kickUser(const std::string& prefix, Client* target, const std::string& reason);
+	void	addInvite(const std::string& target_nick);
+
 	std::string getName() const;
 	std::string	getTopic() const;
-	bool	getInvite() const;
-	bool	hasUser(Client *user) const;
-	bool	hasTopic();
-	bool	emptyChannel() const;
-	bool	isOperator(Client *user);
+	bool		getInvite() const;
+	bool		hasUser(Client *user) const;
+	bool		hasTopic();
+	bool		emptyChannel() const;
+	void		removeUser(Client *user);
+	bool		isOperator(Client *user);
+
+	void	setInvite(char c, const std::string& prefix, Client* user);
+	void	setTopic(char c, const std::string& prefix, Client* user);
+	void	setPassword(char c, const std::string& password, const std::string& prefix, Client* user); 
+	void	setOperator(char sign, const std::string& nickname, const std::string& prefix, Client* user);
+	void	setLimit(char sign, int max_size, const std::string& prefix, Client* user);
 	
-	void	joinChannel(std::string prefix, Client* new_user, std::string password, std::string server_name);
-	void	partChannel(std::string prefix, Client* user_delete, std::string reason);
-	void	setTopicText(std::string prefix, Client* user, std::string topic, std::string server_name);
-	void	kickUser(std::string prefix, Client* target, std::string reason);
-	void	addInvite(std::string target_nick);
-	void	ChannelMessage(std::string prefix, Client* sender, std::string command, std::string buffer);
-	void	ChannelBroadcast(std::string prefix, Client* sender, std::string command, std::string buffer);
-	void	ModeBroadcast(std::string prefix, Client* sender, std::string command, std::string buffer);
-	void	removeUser(Client *user);
-
-
-
-	void	setInvite(char c, std::string prefix, Client* user);
-	void	setTopic(char c, std::string prefix, Client* user);
-	void	setPassword(char c, std::string password, std::string prefix, Client* user); 
-	void	setOperator(char sign, std::string nickname, std::string prefix, Client* user);
-	void	setLimit(char sign, int max_size, std::string prefix, Client* user);
-	
+	void	ChannelMessage(const std::string& prefix, Client* sender, const std::string& command, const std::string& buffer);
+	void	ChannelBroadcast(const std::string& prefix, Client* sender, const std::string& command, const std::string& buffer);
+	void	ModeBroadcast(const std::string& prefix, Client* sender, const std::string& command, const std::string& buffer);
 
 };
 
