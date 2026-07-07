@@ -34,7 +34,7 @@ Commands::~Commands()
 
 }
 
-void Commands::Commandhandler(Message msg, Client* user, Server* server) 
+void Commands::Commandhandler(const Message& msg, Client* user, Server* server) 
 {
 	_handler[msg.getCommand()] (msg, user, server);
 }
@@ -46,7 +46,7 @@ void Commands::Commandhandler(Message msg, Client* user, Server* server)
 // 	send(Clientfd, msg.c_str(), msg.size(), 0);
 // }
 
-void Commands::join_handler(Message msg, Client* user, Server* server)
+void Commands::join_handler(const Message& msg, Client* user, Server* server)
 {
 	if (!user->isRegistered()){
 		sendReply(user->getClientFd(), server->NAME, "451", user->getNickname(), "", "You have not registered");
@@ -94,7 +94,7 @@ void Commands::join_handler(Message msg, Client* user, Server* server)
 	}
 }
 
-void Commands::part_handler(Message msg, Client* user, Server* server) 
+void Commands::part_handler(const Message& msg, Client* user, Server* server) 
 {
 	if (!user->isRegistered()){
 		sendReply(user->getClientFd(), server->NAME, "451", user->getNickname(), "", "You have not registered");
@@ -127,7 +127,7 @@ void Commands::part_handler(Message msg, Client* user, Server* server)
 		server->deleteChannel(channel_name);
 }
 
-void Commands::privmsg_handler(Message msg, Client* user, Server* server) 
+void Commands::privmsg_handler(const Message& msg, Client* user, Server* server) 
 {
 	if (!user->isRegistered()){
 		sendReply(user->getClientFd(), server->NAME, "451", user->getNickname(), "", "You have not registered");
@@ -176,7 +176,7 @@ void Commands::privmsg_handler(Message msg, Client* user, Server* server)
 
 }
 
-void Commands::notice_handler(Message msg, Client* user, Server* server) 
+void Commands::notice_handler(const Message& msg, Client* user, Server* server) 
 {
 	if (!user->isRegistered()){
 		sendReply(user->getClientFd(), server->NAME, "451", user->getNickname(), "", "You have not registered");
@@ -227,7 +227,7 @@ void Commands::notice_handler(Message msg, Client* user, Server* server)
 
 }
 
-void Commands::mode_handler(Message msg, Client* user, Server* server) 
+void Commands::mode_handler(const Message& msg, Client* user, Server* server) 
 {
 	if (!user->isRegistered()){
 		sendReply(user->getClientFd(), server->NAME, "451", user->getNickname(), "", "You have not registered");
@@ -296,7 +296,7 @@ void Commands::mode_handler(Message msg, Client* user, Server* server)
 	}
 }
 
-void	Commands::topic_handler(Message msg, Client* user, Server* server)
+void	Commands::topic_handler(const Message& msg, Client* user, Server* server)
 {
 	if (!user->isRegistered())
 	{
@@ -333,7 +333,7 @@ void	Commands::topic_handler(Message msg, Client* user, Server* server)
 	channel->setTopicText(msg.getPrefix(), user, topic, server->NAME);
 }
 
-void	Commands::kick_handler(Message msg, Client* user, Server* server)
+void	Commands::kick_handler(const Message& msg, Client* user, Server* server)
 {
 	if (!user->isRegistered()){
 		sendReply(user->getClientFd(), server->NAME, "451", user->getNickname(), "", "You have not registered");
@@ -383,7 +383,7 @@ void	Commands::kick_handler(Message msg, Client* user, Server* server)
     	server->deleteChannel(channel_name);
 }
 
-void Commands::invite_handler(Message msg, Client* user, Server* server)
+void Commands::invite_handler(const Message& msg, Client* user, Server* server)
 {
 	if (!user->isRegistered()){
 		sendReply(user->getClientFd(), server->NAME, "451", user->getNickname(), "", "You have not registered");
@@ -440,7 +440,7 @@ void Commands::invite_handler(Message msg, Client* user, Server* server)
 
 //protocolist work(on going)
 
-void Commands::nick_handler(Message msg, Client* user, Server* server) 
+void Commands::nick_handler(const Message& msg, Client* user, Server* server) 
 {
 	std::string oldNick = user->getNickname();
 	std::vector<std::string> params = msg.getParams();
@@ -468,7 +468,7 @@ void Commands::nick_handler(Message msg, Client* user, Server* server)
     	user->setRegistered();
 }
 
-void Commands::pass_handler(Message msg, Client* user, Server* server) 
+void Commands::pass_handler(const Message& msg, Client* user, Server* server) 
 {
 	///o get nickname ou user tem de vericar se exite ou nao porque caso nao exista tenho de mandar unknow ou '*' como o nick ou user (if(empty) = '*' || = unknow)
 	std::vector<std::string> params = msg.getParams();
@@ -492,7 +492,7 @@ void Commands::pass_handler(Message msg, Client* user, Server* server)
     	user->setRegistered();
 }
 
-void Commands::user_handler(Message msg, Client* user, Server* server)
+void Commands::user_handler(const Message& msg, Client* user, Server* server)
 {
 	std::vector<std::string> params = msg.getParams();
 	if (user->isRegistered()){

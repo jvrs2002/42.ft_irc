@@ -132,7 +132,7 @@ void	Channel::setTopicText(const std::string& prefix, Client* user, const std::s
 		return ;
 	}
 	_topic = topic;
-	this->ChannelBroadcast(prefix, user, "TOPIC", _topic);
+	this->ChannelBroadcast(prefix, "TOPIC", _topic);
 }
 
 void	Channel::kickUser(const std::string& prefix, Client* target, const std::string& reason) 
@@ -157,7 +157,7 @@ void	Channel::setInvite(char sign, const std::string& prefix, Client* user) {
 		_invite_active = true;
 	else 
 		_invite_active = false;
-	this->ModeBroadcast(prefix, user, "MODE", std::string(1, sign) + "i");
+	this->ModeBroadcast(prefix, "MODE", std::string(1, sign) + "i");
 }
 
 void	Channel::setTopic(char sign, const std::string& prefix, Client* user) {
@@ -165,7 +165,7 @@ void	Channel::setTopic(char sign, const std::string& prefix, Client* user) {
 		_topic_active = true;
 	else
 		_topic_active = false;
-	this->ModeBroadcast(prefix, user, "MODE", std::string(1, sign) + "t");
+	this->ModeBroadcast(prefix, "MODE", std::string(1, sign) + "t");
 }
 
 void	Channel::setPassword(char sign, const std::string& password, const std::string& prefix, Client* user) 
@@ -175,7 +175,7 @@ void	Channel::setPassword(char sign, const std::string& password, const std::str
 	else
 		_password_active = false;
 	_password = password;
-	this->ModeBroadcast(prefix, user, "MODE", std::string(1, sign) + "k " + password);
+	this->ModeBroadcast(prefix, "MODE", std::string(1, sign) + "k " + password);
 }
 
 void	Channel::setOperator(char sign, const std::string& nickname, const std::string& prefix, Client* user)
@@ -194,7 +194,7 @@ void	Channel::setOperator(char sign, const std::string& nickname, const std::str
 		_operators.erase(tmp);
 	else 
 	 // return error
-	this->ModeBroadcast(prefix, user, "MODE", std::string(1, sign) + "o " + nickname);
+	this->ModeBroadcast(prefix, "MODE", std::string(1, sign) + "o " + nickname);
 }
 
 void	Channel::setLimit(char sign, int max_size, const std::string& prefix, Client* user) {
@@ -202,12 +202,12 @@ void	Channel::setLimit(char sign, int max_size, const std::string& prefix, Clien
 	{
 		_user_limit_active = true;
 		_user_limit = max_size;
-		this->ModeBroadcast(prefix, user, "MODE", std::string(1, sign) + "l " + intToString(max_size));
+		this->ModeBroadcast(prefix, "MODE", std::string(1, sign) + "l " + intToString(max_size));
 	}
 	else if (sign == '-')
 	{
 		_user_limit_active = false;
-		this->ModeBroadcast(prefix, user, "MODE", std::string(1, sign) + "l");
+		this->ModeBroadcast(prefix, "MODE", std::string(1, sign) + "l");
 	}
 }
 
@@ -257,13 +257,13 @@ void	Channel::ChannelMessage(const std::string& prefix, Client *sender, const st
 	}
 }
 
-void	Channel::ChannelBroadcast(const std::string& prefix, Client *sender, const std::string& command, const std::string& buffer) {
+void	Channel::ChannelBroadcast(const std::string& prefix, const std::string& command, const std::string& buffer) {
 	std::string msg = prefix + " " + command + " " + _channel_name + " :" + buffer + "\r\n";
 	for (std::set<Client*>::iterator it = _users.begin(); it != _users.end(); it++)
 		send((*it)->getClientFd(), msg.c_str(), msg.size(), 0);
 }
 
-void	Channel::ModeBroadcast(const std::string& prefix, Client *sender, const std::string& command, const std::string& buffer) {
+void	Channel::ModeBroadcast(const std::string& prefix, const std::string& command, const std::string& buffer) {
 	std::string msg = prefix + " " + command + " " + _channel_name + " " + buffer + "\r\n";
 	for (std::set<Client*>::iterator it = _users.begin(); it != _users.end(); it++)
 		send((*it)->getClientFd(), msg.c_str(), msg.size(), 0);

@@ -70,8 +70,8 @@ public:
 	void	setLimit(char sign, int max_size, const std::string& prefix, Client* user);
 	
 	void	ChannelMessage(const std::string& prefix, Client* sender, const std::string& command, const std::string& buffer);
-	void	ChannelBroadcast(const std::string& prefix, Client* sender, const std::string& command, const std::string& buffer);
-	void	ModeBroadcast(const std::string& prefix, Client* sender, const std::string& command, const std::string& buffer);
+	void	ChannelBroadcast(const std::string& prefix, const std::string& command, const std::string& buffer);
+	void	ModeBroadcast(const std::string& prefix, const std::string& command, const std::string& buffer);
 
 };
 
