@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:08 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/22 21:35:32 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/06/15 18:46:45 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,9 @@
 # include <unistd.h>
 # include <fcntl.h>
 # include <set>
-# include "Channel.hpp"
+# include <errno.h>
+
+class Channel;
 
 class Client
 {
@@ -35,18 +37,44 @@ private:
 	bool	_authenticated;
 	bool	_registered;
 
-	std::set<Channel*> _channels; // stores channels pointers, maximum 10 channels per user
+	std::set<Channel*> _channels;	// stores channels pointers, maximum 10 channels per user
 
 	std::string	_ip;
-	int	_port;
+	std::string	_port;
 
 	int	_socket_fd; // client's socket fd
 
 	std::string	_buffer;
 public:
-	Client(std::string ip, std::string port, std::string buffer, int fd);
+	enum RecvReturn{
+			RECV_SUCCESS,	// read success
+			RECV_EOF,		// user disconnected
+			RECV_ERROR		// read error
+		};
+
+	Client();
+	Client(const std::string& ip, const std::string&, int fd);
 	~Client();
-	int	getClientFd();
+
+	bool				initClient(const std::string& ip, const std::string& port, int fd);
+	bool				addToChannel(Channel* channel);
+	RecvReturn			receiveBuffer();
+	bool				isRegistered() const;
+	bool				isAuthenticated() const;
+	bool				setRegistered();
+	void				setAuthenticated();
+	int					getClientFd() const;
+	const std::string&	getClientIP() const;
+	const std::string&	getUsername() const;
+	const std::string&	getNickname() const;
+	const std::string&	getRealName() const;
+	bool				setNickname(const std::string& nickname);
+	bool				setUsername(const std::string& username);
+	bool				setRealname(const std::string& realname);
+	bool				disconnectChannel(Channel *channel);
+	std::string			handlePartialBuffer();
+	void Cbroadcast(const std::string& msg); //extra
+	bool ValidNick(const std::string& nick); //extra
 };
 
 #endif
