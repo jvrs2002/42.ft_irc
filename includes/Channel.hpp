@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:03 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/15 18:44:52 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/07/07 16:28:23 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,16 +63,16 @@ public:
 	void		removeUser(Client *user);
 	bool		isOperator(Client *user);
 
-	void	setInvite(char c, const std::string& prefix, Client* user);
-	void	setTopic(char c, const std::string& prefix, Client* user);
-	void	setPassword(char c, const std::string& password, const std::string& prefix, Client* user); 
-	void	setOperator(char sign, const std::string& nickname, const std::string& prefix, Client* user);
-	void	setLimit(char sign, int max_size, const std::string& prefix, Client* user);
+	void	setInvite(char c, const std::string& prefix);
+	void	setTopic(char c, const std::string& prefix);
+	void	setPassword(char c, const std::string& password, const std::string& prefix); 
+	void	setOperator(char sign, const std::string& nickname, const std::string& prefix);
+	void	setLimit(char sign, int max_size, const std::string& prefix);
 	
 	void	ChannelMessage(const std::string& prefix, Client* sender, const std::string& command, const std::string& buffer);
 	void	ChannelBroadcast(const std::string& prefix, const std::string& command, const std::string& buffer);
 	void	ModeBroadcast(const std::string& prefix, const std::string& command, const std::string& buffer);
-
+	const	std::set<Client*>&getUsers() const;
 };
 
 

@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:51 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/15 18:45:07 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/07/07 16:28:01 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,7 +152,7 @@ void	Channel::addInvite(const std::string& target_nick)
 }
 
 
-void	Channel::setInvite(char sign, const std::string& prefix, Client* user) {
+void	Channel::setInvite(char sign, const std::string& prefix) {
 	if (sign == '+')
 		_invite_active = true;
 	else 
@@ -160,7 +160,7 @@ void	Channel::setInvite(char sign, const std::string& prefix, Client* user) {
 	this->ModeBroadcast(prefix, "MODE", std::string(1, sign) + "i");
 }
 
-void	Channel::setTopic(char sign, const std::string& prefix, Client* user) {
+void	Channel::setTopic(char sign, const std::string& prefix) {
 	if (sign == '+')
 		_topic_active = true;
 	else
@@ -168,7 +168,7 @@ void	Channel::setTopic(char sign, const std::string& prefix, Client* user) {
 	this->ModeBroadcast(prefix, "MODE", std::string(1, sign) + "t");
 }
 
-void	Channel::setPassword(char sign, const std::string& password, const std::string& prefix, Client* user) 
+void	Channel::setPassword(char sign, const std::string& password, const std::string& prefix) 
 {
 	if (sign == '+') 
 		_password_active = true;
@@ -178,7 +178,7 @@ void	Channel::setPassword(char sign, const std::string& password, const std::str
 	this->ModeBroadcast(prefix, "MODE", std::string(1, sign) + "k " + password);
 }
 
-void	Channel::setOperator(char sign, const std::string& nickname, const std::string& prefix, Client* user)
+void	Channel::setOperator(char sign, const std::string& nickname, const std::string& prefix)
 {
 	Client *tmp = NULL;
 	for (std::set<Client *>::iterator it = _users.begin(); it != _users.end(); it++ )
@@ -197,7 +197,7 @@ void	Channel::setOperator(char sign, const std::string& nickname, const std::str
 	this->ModeBroadcast(prefix, "MODE", std::string(1, sign) + "o " + nickname);
 }
 
-void	Channel::setLimit(char sign, int max_size, const std::string& prefix, Client* user) {
+void	Channel::setLimit(char sign, int max_size, const std::string& prefix) {
 	if (sign == '+')
 	{
 		_user_limit_active = true;
@@ -267,4 +267,9 @@ void	Channel::ModeBroadcast(const std::string& prefix, const std::string& comman
 	std::string msg = prefix + " " + command + " " + _channel_name + " " + buffer + "\r\n";
 	for (std::set<Client*>::iterator it = _users.begin(); it != _users.end(); it++)
 		send((*it)->getClientFd(), msg.c_str(), msg.size(), 0);
+}
+
+const std::set<Client*>& Channel::getUsers() const
+{
+	return _users;
 }

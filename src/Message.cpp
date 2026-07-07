@@ -6,11 +6,11 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:33 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/05/13 19:24:01 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/07/07 16:23:32 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "includes/Message.hpp"
+#include "Message.hpp"
 
 Message::Message()
 {
@@ -22,13 +22,13 @@ Message::Message()
 Message::~Message(){}
 std::string Message::SetPrefix(Client *user)
 {
-	std::string  username = user->getUsername();
-	std::string  nickname = user->getNickname();
-	std::string  ip = user->getClientIP();
+	const std::string& username = user->getUsername();
+	const std::string& nickname = user->getNickname();
+	const std::string& ip = user->getClientIP();
 
 	if (username.empty() || nickname.empty() || ip.empty())
 		return("");
-	std::string prefix = ":" + nickname + "!" +username + "@" + ip;
+	std::string prefix = ":" + nickname + "!" + username + "@" + ip;
 	return(prefix);
 }
 Message::Message(Client *user, const std::string& command)
@@ -37,14 +37,14 @@ Message::Message(Client *user, const std::string& command)
 	int len = temp.size();
 	size_t start = temp.find_first_not_of(" \t");
 	if (start == std::string::npos)
-    	return;
+		return;
 	temp = temp.substr(start);
-	if (len == 2 ){
+	if (len == 2){
 		std::cout << std::endl;
 		return ;
 	}
 	if (len > 511){
-		sendReply(user->getClientFd(), SERVER_NAME, "417", user->getNickname(), "", "Input line was too long");
+		sendReply(user->getClientFd(), "irc.ft_irc.net", "417", user->getNickname(), "", "Input line was too long");
 		return ;
 	}
 	this->prefix = SetPrefix(user);
@@ -97,14 +97,14 @@ std::vector<std::string> Message::Fillparams(std::string line)
 	std::vector<std::string> params;
 	size_t space = line.find_first_of(" \t");
 	if (space == std::string::npos)
-        return params;
+		return params;
 	std::string rest = line.substr(space + 1);
 	while (!rest.empty())
 	{
 		while (!rest.empty() && isSpace(rest[0]))
-            rest.erase(0, 1);
-        if (rest.empty())
-            break;
+			rest.erase(0, 1);
+		if (rest.empty())
+			break;
 		if (rest[0] == ':')
 		{
 			params.push_back(rest.substr(1));

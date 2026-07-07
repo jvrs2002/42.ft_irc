@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:06 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/19 15:21:13 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/07/07 16:27:18 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -236,7 +236,7 @@ bool Client::ValidNick(const std::string& nick)
         return false;
 
     // limite comum
-    if (nick.size() < 9)
+    if (nick.size() > 9)
         return false;
 
     // primeiro char deve ser letra ou alguns símbolos permitidos
