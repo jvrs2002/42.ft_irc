@@ -199,3 +199,58 @@ std::string	Client::handlePartialBuffer()
 	_buffer.erase(0, delim + 2);
 	return substr_buffer;
 }
+
+//extra from protocolist person
+
+
+void Client::Cbroadcast(const std::string& msg) // so para os chanels que o client esta
+{
+    std::set<Client*> sent;
+
+    std::set<Channel*>::iterator it = _channels.begin();
+    while (it != _channels.end())
+    {
+        Channel* channel = *it;
+
+        const std::set<Client*>& users = channel->getUsers();
+
+        std::set<Client*>::iterator cit = users.begin();
+        while (cit != users.end())
+        {
+            Client* target = *cit;
+
+            if (target && target != this && sent.find(target) == sent.end())
+            {
+                send(target->getClientFd(), msg.c_str(), msg.size(), 0);
+                sent.insert(target);
+            }
+            ++cit;
+        }
+        ++it;
+    }
+}
+
+bool Client::ValidNick(const std::string& nick)
+{
+    if (nick.empty())
+        return false;
+
+    // limite comum
+    if (nick.size() < 9)
+        return false;
+
+    // primeiro char deve ser letra ou alguns símbolos permitidos
+    if (!isalpha(nick[0]) && nick[0] != '_' && nick[0] != '-')
+        return false;
+
+    for (size_t i = 0; i < nick.size(); i++)
+    {
+        char c = nick[i];
+
+        // permitido: letras, números, '_' e '-'
+        if (!isalnum(c) && c != '_' && c != '-')
+            return false;
+    }
+
+    return true;
+}

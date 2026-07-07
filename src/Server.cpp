@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/22 14:10:37 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/07/01 21:02:50 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,7 +127,7 @@ void	Server::addClient(const std::string& ip, const std::string& port, int clien
 
 	Client&	new_client = _client_map[client_fd];
 	
-	if (new_client.initClient(ip, port, client_fd) == -1)
+	if (new_client.initClient(ip, port, client_fd) == false)
 		disconnectClient(&new_client);
 
 	struct pollfd	pfd;
@@ -172,8 +172,11 @@ bool	Server::deleteChannel(const std::string& channel_name)
 
 void	Server::disconnectClient(Client *user)
 {
-	if (!userExists(user->getNickname()))
+	if (!user)
+	{
+		shutdownServer(66); // used only to debug, ideally only return should be called
 		return ;
+	}
 
 	int	client_fd = user->getClientFd();
 	std::vector<struct pollfd>::iterator it = _pollfd_vector.begin();
@@ -263,7 +266,9 @@ void	Server::processEvents(int events_count)
 	while (events_count > 0 && i < _pollfd_vector.size()) {
 		if (_pollfd_vector[i].revents == POLLIN) {
 			active_client = getClientInstance(_pollfd_vector[i].fd);
-			if(active_client) {
+			if (!active_client) // new client to be added
+				acceptClient();
+			else {
 				status = active_client->receiveBuffer();
 				if (status == Client::RECV_EOF) {
 					disconnectClient(active_client);

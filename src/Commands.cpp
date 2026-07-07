@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "Commands.hpp"
+#include "Server.hpp" //extra
 #include "Utils.hpp"
 
 Commands::Commands()
@@ -25,7 +26,7 @@ Commands::Commands()
 	_handler["INVITE"] = &invite_handler;
 	_handler["PASS"] = &pass_handler;
 	_handler["USER"] = &user_handler;
-	//_handler["NICK"] = &nick_handler;   por terminar
+	_handler["NICK"] = &nick_handler;
 }
 
 Commands::~Commands()
@@ -439,30 +440,37 @@ void Commands::invite_handler(Message msg, Client* user, Server* server)
 
 //protocolist work(on going)
 
-/*void Commands::nick_handler(Message msg, Client* user, Server* server) 
+void Commands::nick_handler(Message msg, Client* user, Server* server) 
 {
+	std::string oldNick = user->getNickname();
 	std::vector<std::string> params = msg.getParams();
 	if (params.empty())
 	{
-		sendReply(user->getClientFd(), server->NAME, "461", user->getNickname(), "NICK", "Not enough parameters");
+		sendReply(user->getClientFd(), server->NAME, "431", user->getNickname(), "", "No nick given");
 		return ;
 	}
-	if (server.userExists(params[0])) // por fazer funcao (existe ja?)
+	if(!user->ValidNick(params[0]))
+	{
+		sendReply(user->getClientFd(), server->NAME, "432", user->getNickname(), "", "Invalid nickname");
+		return ;
+	}
+	if (server->userExists(params[0]))
 	{
 		sendReply(user->getClientFd(), server->NAME, "433", user->getNickname(), "", "Nickname is already in use");
 		return ;
 	}
+	std::string oldNick = user->getNickname();
+	std::string rmsg = ":" + oldNick + "!" + user->getUsername() + "@" + user->getClientIP() + " NICK :" + user->getNickname() + "\r\n";
 	user->setNickname(params[0]);
 	if (user->isRegistered())
-		broadcast("");//comunicar com  todos os clientes que foi mudado o nick do cliente que esta ligado pelos canais 
-	if (!(user->isRegistered()) && user->hasNick() && user->hasUser() && user->isAuthenticated())
-    	user->setregistered()
-}*/
+		user->Cbroadcast(rmsg);//comunicar com  todos os clientes que foi mudado o nick do cliente que esta ligado pelos canais 
+	if (!(user->isRegistered()) && !user->getNickname().empty() && !user->getUsername().empty() && user->isAuthenticated())
+    	user->setRegistered();
+}
 
 void Commands::pass_handler(Message msg, Client* user, Server* server) 
 {
 	///o get nickname ou user tem de vericar se exite ou nao porque caso nao exista tenho de mandar unknow ou '*' como o nick ou user (if(empty) = '*' || = unknow)
-	std::string password = server->getpassword();//fazer funcao
 	std::vector<std::string> params = msg.getParams();
 	if (user->isAuthenticated()){ //fazer funcao
 		sendReply(user->getClientFd(), server->NAME, "462", user->getNickname(), "PASS", "Already registered"); //independente de estar registrado ou nao, tenho mandar esta mensagem se estiver autenthicado
@@ -474,14 +482,14 @@ void Commands::pass_handler(Message msg, Client* user, Server* server)
 		return ;
 	}
 	std::string params_password = params[0];
-	if (params_password !=  password)
+	if (!server->authenticate(params[0], user))
 	{
 		sendReply(user->getClientFd(), server->NAME, "464", user->getNickname(), "", "Password incorrect");
 		return ;
 	}
 	user->setAuthenticated();	//fazer funcao
-	if (user->hasNick() && user->hasUser() && user->hisAuthenticated())
-    	user->setRegistered()
+	if (!user->getNickname().empty() && !user->getUsername().empty() && user->isAuthenticated())
+    	user->setRegistered();
 }
 
 void Commands::user_handler(Message msg, Client* user, Server* server)
@@ -496,11 +504,11 @@ void Commands::user_handler(Message msg, Client* user, Server* server)
 		return ;	
 	}
 	user->setUsername(params[0]);
-	user->setRealName(params[3]);
-	if (user->hasNick() && user->hasUser() && user->hisAuthenticated())
-    	user->setRegistered()
+	user->setRealname(params[3]);
+	if (!user->getNickname().empty() && !user->getUsername().empty() && user->isAuthenticated())
+    	user->setRegistered();
 }
-
+//falta as funcoes: hasNick() hasUser()
 //ATENCAO!!! -> estado do cliente tem prioridade sobre parsing leve
 //authenticado = password aceite que o user deu ou o sv nao tem pass
 //registrado = com um user valido e um nick porem diferente de todos os presentes
