@@ -48,7 +48,7 @@ void Commands::Commandhandler(const Message& msg, Client* user, Server* server)
 // 	send(Clientfd, msg.c_str(), msg.size(), 0);
 // }
 
-void Commands::join_handler(const Message& msg, Client* user, Server* server) //verifica so se o user nao acaba por entrar se der erro por +i +k ou +l 
+/*void Commands::join_handler(const Message& msg, Client* user, Server* server) //verifica so se o user nao acaba por entrar se der erro por +i +k ou +l 
 { //verifica se o hexchat aplica as mudanças
 	if (!user->isRegistered()){
 		sendReply(user->getClientFd(), server->NAME, "451", user->getNickname(), "", "You have not registered");
@@ -94,6 +94,51 @@ void Commands::join_handler(const Message& msg, Client* user, Server* server) //
 		}
 		channel->joinChannel(msg.getPrefix(), user, password, server->NAME);
 	}
+}*/
+void Commands::join_handler(const Message& msg, Client* user, Server* server) //feito :D
+{
+	if (!user->isRegistered())
+	{
+		sendReply(user->getClientFd(), server->NAME, "451",
+			user->getNickname(), "", "You have not registered");
+		return;
+	}
+
+	std::vector<std::string> params = msg.getParams();
+
+	if (params.empty())
+	{
+		sendReply(user->getClientFd(), server->NAME, "461",
+			user->getNickname(), "JOIN", "Not enough parameters");
+		return;
+	}
+
+	const std::string& channel_name = params[0];
+	std::string password = (params.size() > 1) ? params[1] : ""; //para caso nao exista
+
+	if (channel_name.size() <= 1 || channel_name[0] != CHANNEL)
+	{
+		sendReply(user->getClientFd(), server->NAME, "403",
+			user->getNickname(), channel_name, "No such channel");
+		return;
+	}
+
+	Channel* channel = server->getChannel(channel_name);
+
+	if (!channel)
+	{
+		server->createChannel(channel_name, user);
+		channel = server->getChannel(channel_name);
+		if (!channel)
+			return;
+	}
+	if (channel->hasUser(user))
+	{
+		sendReply(user->getClientFd(), server->NAME, "443",
+			user->getNickname(), channel_name, "User is already in channel");
+		return;
+	}
+	channel->joinChannel(msg.getPrefix(), user, password, server->NAME);
 }
 
 void Commands::part_handler(const Message& msg, Client* user, Server* server) 
@@ -149,7 +194,7 @@ void Commands::privmsg_handler(const Message& msg, Client* user, Server* server)
 
 	const std::string& target = params[0];
 	const std::string& message = params[1];
-	if (target[0] == CHANNEL)
+	if (!target.empty() && target[0] == CHANNEL) // mais seguro caso channel =""
 	{
 		Channel* channel = server->getChannel(target);
 		if (channel == NULL)
@@ -175,62 +220,41 @@ void Commands::privmsg_handler(const Message& msg, Client* user, Server* server)
 		std::string priv_msg = msg.getPrefix() + " PRIVMSG " + target + " :" + message + "\r\n";
 		send(target_fd, priv_msg.c_str(), priv_msg.size(), 0);
 	}
-
 }
 
-void Commands::notice_handler(const Message& msg, Client* user, Server* server) //verifica
+void Commands::notice_handler(const Message& msg, Client* user, Server* server) //revisto
 { 
 	//o notice serve para: enviar mensagens sem gerar erros automático sendo usado por bots, servers, serviços
 	//acho que o notice nunca responde com erros e so retorna silenciosamente, verifica se é verdade isso, caso seja remove os replys
-	if (!user->isRegistered()){
-		sendReply(user->getClientFd(), server->NAME, "451", user->getNickname(), "", "You have not registered");
+	if (!user->isRegistered())
 		return ;
-	}
 	std::vector<std::string> params = msg.getParams();
 
-	if (params.size() < 1)
-	{
-		sendReply(user->getClientFd(), server->NAME, "411", user->getNickname(), "NOTICE", "No recipient given");
-		return ;
-	}
 	if (params.size() < 2)
-	{
-		sendReply(user->getClientFd(), server->NAME, "412", user->getNickname(), "", "No text to send");
 		return ;
-	}
 
 	const std::string& target = params[0];
 	const std::string& message = params[1];
-	if (target[0] == CHANNEL)
+	if (!target.empty() && target[0] == CHANNEL) // mais seguro caso channel =""
 	{
 		Channel* channel = server->getChannel(target);
 		if (channel == NULL)
-		{
-			sendReply(user->getClientFd(), server->NAME, "403", user->getNickname(), target, "No such channel");
 			return ;
-		}
 		if (!channel->hasUser(user))
-		{	
-			sendReply(user->getClientFd(), server->NAME, "404", user->getNickname(), target, "Cannot send to channel");
 			return ;
-		}
 		channel->ChannelMessage(msg.getPrefix(), user, " NOTICE ", message);
 	}
 	else
 	{
-
 		int target_fd = server->getClientFd(target);
 		if (target_fd == -1)
-		{
-			sendReply(user->getClientFd(), server->NAME, "401", user->getNickname(), target, "No such nick");
 			return ;
-		}
 		std::string notice_msg = msg.getPrefix() + " NOTICE " + target + " :" + message + "\r\n";
 		send(target_fd, notice_msg.c_str(), notice_msg.size(), 0);
 	}
 }
 
-void Commands::mode_handler(const Message& msg, Client* user, Server* server) //verifica
+/*void Commands::mode_handler(const Message& msg, Client* user, Server* server) //verifica
 { //acho que tens de fazer BROADCAST do mode para o hexchat atualizar as coisas
 	//verificas se o target existe para aplicar as mudancas do mode que mudam as permissoes do user?
 	if (!user->isRegistered()){
@@ -263,7 +287,7 @@ void Commands::mode_handler(const Message& msg, Client* user, Server* server) //
 	int max_size = 0;
 	for (int i = 0; modestring[i] != '\0'; i++) { //i++ 1
 		if (modestring[i] == '+' || modestring[i] == '-')
-			sign = modestring[i++]; //nao fazes aqui duas vezes i++ se fazes tira o i++?  i++ 2
+			sign = modestring[i++];
 		switch (modestring[i])
 		{
 			case 'i':
@@ -302,6 +326,119 @@ void Commands::mode_handler(const Message& msg, Client* user, Server* server) //
 			}
 		}
 	}
+}*/
+//a minha versão
+void Commands::mode_handler(const Message& msg, Client* user, Server* server) // fiz um novo para caso venha a estar mal este
+{
+	if (!user->isRegistered())
+	{
+		sendReply(user->getClientFd(), server->NAME, "451",
+			user->getNickname(), "", "You have not registered");
+		return;
+	}
+
+	std::vector<std::string> params = msg.getParams();
+	if (params.size() < 2)
+	{
+		sendReply(user->getClientFd(), server->NAME, "461",
+			user->getNickname(), "MODE", "Not enough parameters");
+		return;
+	}
+
+	const std::string& channel_name = params[0];
+	const std::string& modestring = params[1];
+
+	Channel* channel = server->getChannel(channel_name);
+	if (!channel)
+	{
+		sendReply(user->getClientFd(), server->NAME, "403",
+			user->getNickname(), channel_name, "No such channel");
+		return;
+	}
+
+	if (!channel->isOperator(user))
+	{
+		sendReply(user->getClientFd(), server->NAME, "482",
+			user->getNickname(), channel_name, "You're not a channel operator");
+		return;
+	}
+
+	char sign = '+';
+	int arg_index = 2;
+
+	std::string used_args = "";
+	for (int i = 0; modestring[i]; i++)
+	{
+		if (modestring[i] == '+' || modestring[i] == '-')
+			sign = modestring[i++];
+		char mode = modestring[i];
+
+		switch (mode)
+		{
+			case 'i':
+				channel->setInvite(sign, msg.getPrefix());
+				break;
+
+			case 't':
+				channel->setTopic(sign, msg.getPrefix());
+				break;
+
+			case 'k':
+				if (sign == '+') 
+				{
+					if (arg_index >= (int)params.size())
+					{
+						sendReply(user->getClientFd(), server->NAME, "461",
+							user->getNickname(), "MODE", "Not enough parameters");
+						return;
+					}
+					std::string password = params[arg_index++];
+					used_args += " " + password;
+					channel->setPassword('+', password, msg.getPrefix());
+				}
+				else
+					channel->setPassword('-', "", msg.getPrefix());
+				break;
+
+			case 'o':
+				if (arg_index >= (int)params.size()) {
+					sendReply(user->getClientFd(), server->NAME, "461",
+						user->getNickname(), "MODE", "Not enough parameters");
+					return;
+				}
+				{
+					std::string nickname = params[arg_index++];
+					used_args += " " + nickname;
+					channel->setOperator(sign, nickname, msg.getPrefix());
+				}
+				break;
+
+			case 'l':
+				if (sign == '+') 
+				{
+					if (arg_index >= (int)params.size())
+					{
+						sendReply(user->getClientFd(), server->NAME, "461", user->getNickname(), "MODE", "Not enough parameters");
+						return;
+					}
+					int max_size = atoi(params[arg_index++].c_str());
+					used_args += " " + params[arg_index - 1];
+					channel->setLimit('+', max_size, msg.getPrefix());
+				}
+				else 
+					channel->setLimit('-', 0, msg.getPrefix());
+				break;
+
+			default:
+			{
+				std::string modechar(1, mode);
+				sendReply(user->getClientFd(), server->NAME, "472", user->getNickname(), modechar, "is unknown mode char to me");
+				break;
+			}
+		}
+	}
+
+	channel->ChannelBroadcast(msg.getPrefix(),"MODE", channel_name + " " + modestring + used_args);
 }
 
 void	Commands::topic_handler(const Message& msg, Client* user, Server* server) //revisto mas testar se aplica as mudanças no hexchat
