@@ -48,8 +48,8 @@ void Commands::Commandhandler(const Message& msg, Client* user, Server* server)
 // 	send(Clientfd, msg.c_str(), msg.size(), 0);
 // }
 
-void Commands::join_handler(const Message& msg, Client* user, Server* server)
-{
+/*void Commands::join_handler(const Message& msg, Client* user, Server* server) //verifica so se o user nao acaba por entrar se der erro por +i +k ou +l 
+{ //verifica se o hexchat aplica as mudanças
 	if (!user->isRegistered()){
 		sendReply(user->getClientFd(), server->NAME, "451", user->getNickname(), "", "You have not registered");
 		return ;
@@ -94,10 +94,55 @@ void Commands::join_handler(const Message& msg, Client* user, Server* server)
 		}
 		channel->joinChannel(msg.getPrefix(), user, password, server->NAME);
 	}
+}*/
+void Commands::join_handler(const Message& msg, Client* user, Server* server) //feito :D
+{
+	if (!user->isRegistered())
+	{
+		sendReply(user->getClientFd(), server->NAME, "451",
+			user->getNickname(), "", "You have not registered");
+		return;
+	}
+
+	std::vector<std::string> params = msg.getParams();
+
+	if (params.empty())
+	{
+		sendReply(user->getClientFd(), server->NAME, "461",
+			user->getNickname(), "JOIN", "Not enough parameters");
+		return;
+	}
+
+	const std::string& channel_name = params[0];
+	std::string password = (params.size() > 1) ? params[1] : ""; //para caso nao exista
+
+	if (channel_name.size() <= 1 || channel_name[0] != CHANNEL)
+	{
+		sendReply(user->getClientFd(), server->NAME, "403",
+			user->getNickname(), channel_name, "No such channel");
+		return;
+	}
+
+	Channel* channel = server->getChannel(channel_name);
+
+	if (!channel)
+	{
+		server->createChannel(channel_name, user);
+		channel = server->getChannel(channel_name);
+		if (!channel)
+			return;
+	}
+	if (channel->hasUser(user))
+	{
+		sendReply(user->getClientFd(), server->NAME, "443",
+			user->getNickname(), channel_name, "User is already in channel");
+		return;
+	}
+	channel->joinChannel(msg.getPrefix(), user, password, server->NAME);
 }
 
 void Commands::part_handler(const Message& msg, Client* user, Server* server) 
-{
+{ // o hexchat aplica as mudancas feitas? se sim, bem feito!
 	if (!user->isRegistered()){
 		sendReply(user->getClientFd(), server->NAME, "451", user->getNickname(), "", "You have not registered");
 		return ;
@@ -129,7 +174,7 @@ void Commands::part_handler(const Message& msg, Client* user, Server* server)
 		server->deleteChannel(channel_name);
 }
 
-void Commands::privmsg_handler(const Message& msg, Client* user, Server* server) 
+void Commands::privmsg_handler(const Message& msg, Client* user, Server* server) //se mandares para o chanel todos veem menos quem manda? se sim, esta tudo bem
 {
 	if (!user->isRegistered()){
 		sendReply(user->getClientFd(), server->NAME, "451", user->getNickname(), "", "You have not registered");
@@ -149,7 +194,7 @@ void Commands::privmsg_handler(const Message& msg, Client* user, Server* server)
 
 	const std::string& target = params[0];
 	const std::string& message = params[1];
-	if (target[0] == CHANNEL)
+	if (!target.empty() && target[0] == CHANNEL) // mais seguro caso channel =""
 	{
 		Channel* channel = server->getChannel(target);
 		if (channel == NULL)
@@ -175,62 +220,43 @@ void Commands::privmsg_handler(const Message& msg, Client* user, Server* server)
 		std::string priv_msg = msg.getPrefix() + " PRIVMSG " + target + " :" + message + "\r\n";
 		send(target_fd, priv_msg.c_str(), priv_msg.size(), 0);
 	}
-
 }
 
-void Commands::notice_handler(const Message& msg, Client* user, Server* server) 
-{
-	if (!user->isRegistered()){
-		sendReply(user->getClientFd(), server->NAME, "451", user->getNickname(), "", "You have not registered");
+void Commands::notice_handler(const Message& msg, Client* user, Server* server) //revisto
+{ 
+	//o notice serve para: enviar mensagens sem gerar erros automático sendo usado por bots, servers, serviços
+	//acho que o notice nunca responde com erros e so retorna silenciosamente, verifica se é verdade isso, caso seja remove os replys
+	if (!user->isRegistered())
 		return ;
-	}
 	std::vector<std::string> params = msg.getParams();
 
-	if (params.size() < 1)
-	{
-		sendReply(user->getClientFd(), server->NAME, "411", user->getNickname(), "NOTICE", "No recipient given");
-		return ;
-	}
 	if (params.size() < 2)
-	{
-		sendReply(user->getClientFd(), server->NAME, "412", user->getNickname(), "", "No text to send");
 		return ;
-	}
 
 	const std::string& target = params[0];
 	const std::string& message = params[1];
-	if (target[0] == CHANNEL)
+	if (!target.empty() && target[0] == CHANNEL) // mais seguro caso channel =""
 	{
 		Channel* channel = server->getChannel(target);
 		if (channel == NULL)
-		{
-			sendReply(user->getClientFd(), server->NAME, "403", user->getNickname(), target, "No such channel");
 			return ;
-		}
 		if (!channel->hasUser(user))
-		{	
-			sendReply(user->getClientFd(), server->NAME, "404", user->getNickname(), target, "Cannot send to channel");
 			return ;
-		}
 		channel->ChannelMessage(msg.getPrefix(), user, " NOTICE ", message);
 	}
 	else
 	{
-
 		int target_fd = server->getClientFd(target);
 		if (target_fd == -1)
-		{
-			sendReply(user->getClientFd(), server->NAME, "401", user->getNickname(), target, "No such nick");
 			return ;
-		}
 		std::string notice_msg = msg.getPrefix() + " NOTICE " + target + " :" + message + "\r\n";
 		send(target_fd, notice_msg.c_str(), notice_msg.size(), 0);
 	}
-
 }
 
-void Commands::mode_handler(const Message& msg, Client* user, Server* server) 
-{
+/*void Commands::mode_handler(const Message& msg, Client* user, Server* server) //verifica
+{ //acho que tens de fazer BROADCAST do mode para o hexchat atualizar as coisas
+	//verificas se o target existe para aplicar as mudancas do mode que mudam as permissoes do user?
 	if (!user->isRegistered()){
 		sendReply(user->getClientFd(), server->NAME, "451", user->getNickname(), "", "You have not registered");
 		return ;
@@ -259,7 +285,7 @@ void Commands::mode_handler(const Message& msg, Client* user, Server* server)
 	std::string password = "";
 	std::string nickname = "";
 	int max_size = 0;
-	for (int i = 0; modestring[i] != '\0'; i++) {
+	for (int i = 0; modestring[i] != '\0'; i++) { //i++ 1
 		if (modestring[i] == '+' || modestring[i] == '-')
 			sign = modestring[i++];
 		switch (modestring[i])
@@ -292,13 +318,130 @@ void Commands::mode_handler(const Message& msg, Client* user, Server* server)
 				else if (sign == '-')
 					channel->setLimit(sign, max_size, msg.getPrefix());
 				break;
-			default:
+			default: //acrescentei como mensagem de erro
+			{
+				std::string modechar(1, modestring[i]);
+				sendReply(user->getClientFd(), server->NAME, "472", user->getNickname(), modechar, "is unknown mode char to me");
 				break;
+			}
 		}
 	}
+}*/
+//a minha versão
+void Commands::mode_handler(const Message& msg, Client* user, Server* server) // fiz um novo para caso venha a estar mal este
+{
+	if (!user->isRegistered())
+	{
+		sendReply(user->getClientFd(), server->NAME, "451",
+			user->getNickname(), "", "You have not registered");
+		return;
+	}
+
+	std::vector<std::string> params = msg.getParams();
+	if (params.size() < 2)
+	{
+		sendReply(user->getClientFd(), server->NAME, "461",
+			user->getNickname(), "MODE", "Not enough parameters");
+		return;
+	}
+
+	const std::string& channel_name = params[0];
+	const std::string& modestring = params[1];
+
+	Channel* channel = server->getChannel(channel_name);
+	if (!channel)
+	{
+		sendReply(user->getClientFd(), server->NAME, "403",
+			user->getNickname(), channel_name, "No such channel");
+		return;
+	}
+
+	if (!channel->isOperator(user))
+	{
+		sendReply(user->getClientFd(), server->NAME, "482",
+			user->getNickname(), channel_name, "You're not a channel operator");
+		return;
+	}
+
+	char sign = '+';
+	int arg_index = 2;
+
+	std::string used_args = "";
+	for (int i = 0; modestring[i]; i++)
+	{
+		if (modestring[i] == '+' || modestring[i] == '-')
+			sign = modestring[i++];
+		char mode = modestring[i];
+
+		switch (mode)
+		{
+			case 'i':
+				channel->setInvite(sign, msg.getPrefix());
+				break;
+
+			case 't':
+				channel->setTopic(sign, msg.getPrefix());
+				break;
+
+			case 'k':
+				if (sign == '+') 
+				{
+					if (arg_index >= (int)params.size())
+					{
+						sendReply(user->getClientFd(), server->NAME, "461",
+							user->getNickname(), "MODE", "Not enough parameters");
+						return;
+					}
+					std::string password = params[arg_index++];
+					used_args += " " + password;
+					channel->setPassword('+', password, msg.getPrefix());
+				}
+				else
+					channel->setPassword('-', "", msg.getPrefix());
+				break;
+
+			case 'o':
+				if (arg_index >= (int)params.size()) {
+					sendReply(user->getClientFd(), server->NAME, "461",
+						user->getNickname(), "MODE", "Not enough parameters");
+					return;
+				}
+				{
+					std::string nickname = params[arg_index++];
+					used_args += " " + nickname;
+					channel->setOperator(sign, nickname, msg.getPrefix());
+				}
+				break;
+
+			case 'l':
+				if (sign == '+') 
+				{
+					if (arg_index >= (int)params.size())
+					{
+						sendReply(user->getClientFd(), server->NAME, "461", user->getNickname(), "MODE", "Not enough parameters");
+						return;
+					}
+					int max_size = atoi(params[arg_index++].c_str());
+					used_args += " " + params[arg_index - 1];
+					channel->setLimit('+', max_size, msg.getPrefix());
+				}
+				else 
+					channel->setLimit('-', 0, msg.getPrefix());
+				break;
+
+			default:
+			{
+				std::string modechar(1, mode);
+				sendReply(user->getClientFd(), server->NAME, "472", user->getNickname(), modechar, "is unknown mode char to me");
+				break;
+			}
+		}
+	}
+
+	channel->ChannelBroadcast(msg.getPrefix(),"MODE", channel_name + " " + modestring + used_args);
 }
 
-void	Commands::topic_handler(const Message& msg, Client* user, Server* server)
+void	Commands::topic_handler(const Message& msg, Client* user, Server* server) //revisto mas testar se aplica as mudanças no hexchat
 {
 	if (!user->isRegistered())
 	{
@@ -335,8 +478,9 @@ void	Commands::topic_handler(const Message& msg, Client* user, Server* server)
 	channel->setTopicText(msg.getPrefix(), user, topic, server->NAME);
 }
 
-void	Commands::kick_handler(const Message& msg, Client* user, Server* server)
+void	Commands::kick_handler(const Message& msg, Client* user, Server* server) //revisto. da broadcast para todos do canal do kick?(senao o hexchat nao atualiza)
 {
+	//curiosidade: é possivel e completamente normal dar selfkick
 	if (!user->isRegistered()){
 		sendReply(user->getClientFd(), server->NAME, "451", user->getNickname(), "", "You have not registered");
 		return ;
@@ -380,12 +524,12 @@ void	Commands::kick_handler(const Message& msg, Client* user, Server* server)
 		sendReply(user->getClientFd(), server->NAME, "441", user->getNickname(), target_nick, "They aren't on that channel");
 		return;
 	}
-	channel->kickUser(msg.getPrefix(), target, reason);
+	channel->kickUser(msg.getPrefix(), target, reason); 
 	if (channel->emptyChannel())
 		server->deleteChannel(channel_name);
 }
 
-void Commands::invite_handler(const Message& msg, Client* user, Server* server)
+void Commands::invite_handler(const Message& msg, Client* user, Server* server) //revisto
 {
 	if (!user->isRegistered()){
 		sendReply(user->getClientFd(), server->NAME, "451", user->getNickname(), "", "You have not registered");
@@ -425,7 +569,7 @@ void Commands::invite_handler(const Message& msg, Client* user, Server* server)
 	
 	Client* target = server->getClientInstance(target_fd);
 	if (channel->hasUser(target)) {
-		sendReply(user->getClientFd(), server->NAME, "443", user->getNickname(), target_nick, "is already on channel");
+		sendReply(user->getClientFd(), server->NAME, "443", user->getNickname(), target_nick, "is already on channel");//fd, server->NAME, "443", user->getNickname(), target_nick + " " + channel_name, "is already on channel
 		return;
 	}
 
@@ -460,12 +604,16 @@ void Commands::nick_handler(const Message& msg, Client* user, Server* server)
 		sendReply(user->getClientFd(), server->NAME, "433", user->getNickname(), "", "Nickname is already in use");
 		return ;
 	}
-	std::string rmsg = ":" + user->getNickname() + "!" + user->getUsername() + "@" + user->getClientIP() + " NICK :" + user->getNickname() + "\r\n";
-	user->setNickname(params[0]);
+	std::string oldNick = user->getNickname(); //guardar a old
+	user->setNickname(params[0]); //criar new
+	std::string rmsg = ":" + oldNick + "!" + user->getUsername() + "@" + user->getClientIP() + " NICK :" + user->getNickname() + "\r\n";
 	if (user->isRegistered())
 		user->Cbroadcast(rmsg);//comunicar com  todos os clientes que foi mudado o nick do cliente que esta ligado pelos canais 
-	if (!(user->isRegistered()) && !user->getNickname().empty() && !user->getUsername().empty() && user->isAuthenticated()) // check this!!!!
+	if (!(user->isRegistered()) && !user->getNickname().empty() && !user->getUsername().empty() && user->isAuthenticated()) // esta bem pq verifica se nao esta empty
+	{
 		user->setRegistered();
+		sendReply(user->getClientFd(), server->NAME, "001", user->getNickname(), "", "Welcome to the IRC server");
+	}
 }
 
 void Commands::pass_handler(const Message& msg, Client* user, Server* server) 
@@ -488,7 +636,10 @@ void Commands::pass_handler(const Message& msg, Client* user, Server* server)
 	}
 	user->setAuthenticated();	//fazer funcao
 	if (!user->getNickname().empty() && !user->getUsername().empty() && user->isAuthenticated())
+	{
 		user->setRegistered();
+		sendReply(user->getClientFd(), server->NAME, "001", user->getNickname(), "", "Welcome to the IRC server");
+	}
 }
 
 void Commands::user_handler(const Message& msg, Client* user, Server* server)
@@ -505,7 +656,10 @@ void Commands::user_handler(const Message& msg, Client* user, Server* server)
 	user->setUsername(params[0]);
 	user->setRealname(params[3]);
 	if (!user->getNickname().empty() && !user->getUsername().empty() && user->isAuthenticated())
+	{
 		user->setRegistered();
+		sendReply(user->getClientFd(), server->NAME, "001", user->getNickname(), "", "Welcome to the IRC server");
+	}
 }
 //falta as funcoes: hasNick() hasUser()
 //ATENCAO!!! -> estado do cliente tem prioridade sobre parsing leve
