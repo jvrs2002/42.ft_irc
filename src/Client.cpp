@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:06 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/07/13 19:36:06 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/07/14 14:58:58 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -221,7 +221,7 @@ void Client::Cbroadcast(const std::string& msg) // so para os chanels que o clie
 
             if (target && target != this && sent.find(target) == sent.end())
             {
-                send(target->getClientFd(), msg.c_str(), msg.size(), 0);
+                send(target->getClientFd(), msg.c_str(), msg.size(), MSG_NOSIGNAL);
                 sent.insert(target);
             }
             ++cit;

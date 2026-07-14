@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ppassos <ppassos@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:11 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/07/07 16:32:15 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/07/14 13:40:50 by ppassos          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -218,7 +218,7 @@ void Commands::privmsg_handler(const Message& msg, Client* user, Server* server)
 			return ;
 		}
 		std::string priv_msg = msg.getPrefix() + " PRIVMSG " + target + " :" + message + "\r\n";
-		send(target_fd, priv_msg.c_str(), priv_msg.size(), 0);
+		send(target_fd, priv_msg.c_str(), priv_msg.size(), MSG_NOSIGNAL);
 	}
 }
 
@@ -250,7 +250,7 @@ void Commands::notice_handler(const Message& msg, Client* user, Server* server) 
 		if (target_fd == -1)
 			return ;
 		std::string notice_msg = msg.getPrefix() + " NOTICE " + target + " :" + message + "\r\n";
-		send(target_fd, notice_msg.c_str(), notice_msg.size(), 0);
+		send(target_fd, notice_msg.c_str(), notice_msg.size(), MSG_NOSIGNAL);
 	}
 }
 
@@ -579,7 +579,7 @@ void Commands::invite_handler(const Message& msg, Client* user, Server* server) 
 
 
 	std::string invite_msg = msg.getPrefix() + " INVITE " + target_nick + " :" + channel_name + "\r\n";
-	send(target->getClientFd(), invite_msg.c_str(), invite_msg.size(), 0);
+	send(target->getClientFd(), invite_msg.c_str(), invite_msg.size(), MSG_NOSIGNAL);
 
 	
 }
