@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/07/18 16:11:47 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/07/18 17:59:02 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -285,16 +285,16 @@ void	Server::processEvents(int events_count)
 						command = active_client->handlePartialBuffer();
 					}
 				}
-				events_count--;
 			}
+			events_count--;
 		}
 		i++;
 	}
 
-/* 	if (events_count != 0) {
+	if (events_count != 0) {
 		std::cerr << "events_count error" << std::endl;
 		shutdownServer(42); // debug possible _pollfd_vector management errors
-	} */
+	}
 }
 
 Client* Server::getClientInstance(int client_fd)
