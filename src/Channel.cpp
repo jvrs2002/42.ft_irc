@@ -14,11 +14,6 @@
 #include "Client.hpp"
 #include "Utils.hpp"
 
-/* :nick!user@host JOIN :#channel
-:server 331 nick #channel :No topic is set
-:server 353 nick = #channel :@nick* 
-:server 366 nick #channel :End of /NAMES list */
-
 Channel::Channel() :
 	_channel_name(),
 	_invite_active(false),
@@ -90,18 +85,15 @@ void	Channel::joinChannel(const std::string& prefix, Client *new_user, const std
 		return ;
 	}
 	_users.insert(new_user);
-	
-	// send join message to each client
+
 	std::string join_msg = prefix + " JOIN :" + _channel_name + "\r\n";
 	for (std::set<Client*>::iterator it = _users.begin(); it != _users.end(); it++)
 		send((*it)->getClientFd(), join_msg.c_str(), join_msg.size(), MSG_NOSIGNAL);
 	
-	// if topic message is set
 	if (_topic_active && !_topic.empty())
 		sendReply(new_user->getClientFd(), server_name, "332",new_user->getNickname(), _channel_name, _topic);
 	else
 		sendReply(new_user->getClientFd(), server_name, "331",new_user->getNickname(), _channel_name, "No topic is set");
-	// send name list to new user
 	std::string names = "";
 	for (std::set<Client*>::iterator it = _users.begin(); it != _users.end(); it++) {
 		if (_operators.count(*it))
@@ -179,7 +171,6 @@ void	Channel::setPassword(char sign, const std::string& password, const std::str
 	if (sign == '+' && !password.empty())
     	mode_param += " " + password;
 	this->ModeBroadcast(prefix, "MODE", mode_param);
-	//this->ModeBroadcast(prefix, "MODE", std::string(1, sign) + "k " + password); //mudei o espaco do "k " para "k"
 }
 
 void	Channel::setOperator(char sign, const std::string& nickname, const std::string& prefix)
