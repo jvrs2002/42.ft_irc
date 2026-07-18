@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/07/07 16:30:52 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/07/07 17:07:23 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,7 +115,7 @@ void	Server::acceptClient()
 	inet_ntop(client_addr.ss_family, utils_get_in_addr((struct sockaddr *)&client_addr), client_ip, sizeof client_ip);
 	client_port = utils_get_port_str((struct sockaddr *)&client_addr);
 
-	std::cout << "server: got connection from IP " << client_ip << "using PORT "<< client_port << std::endl; // testing
+	std::cout << "server: got connection from IP " << client_ip << " using PORT "<< client_port << std::endl; // testing
 
 	addClient(client_ip, client_port, client_fd);
 }
@@ -180,6 +180,8 @@ void	Server::disconnectClient(Client *user)
 
 	int	client_fd = user->getClientFd();
 	std::vector<struct pollfd>::iterator it = _pollfd_vector.begin();
+
+	std::cout << "server: disconnecting from IP " << user->getClientIP() << " using FD " << user->getClientFd() << std::endl; // testing
 
 	while (it != _pollfd_vector.end() && it->fd != client_fd)
 		++it;
@@ -278,6 +280,7 @@ void	Server::processEvents(int events_count)
 				else {
 					command = active_client->handlePartialBuffer();
 					while (!command.empty()) { // if empty it's still not ready to be read
+						std::cout << command << std::endl;
 						Message	msg(active_client, command); // ask to build Message constructor with const &string and Client
 						_command_handler.Commandhandler(msg, active_client, this);
 						command = active_client->handlePartialBuffer();
@@ -313,6 +316,7 @@ bool	Server::authenticate(const std::string& user_pass, Client *user)
 
 	if (user_pass == _password) {
 		user->setAuthenticated();
+		std::cout << "server: user with FD " << user->getClientFd() << " is authenticated" << std::endl;
 		return true;
 	}
 
