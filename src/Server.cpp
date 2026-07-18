@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/07/18 20:50:10 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/07/18 21:14:45 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,13 @@ void	Server::initServer()
 		exit(EXIT_FAILURE);
 	}
 
+	if (fcntl(_socket_fd, F_SETFL, O_NONBLOCK) == -1) {
+		std::cerr << "fcntl() error setting O_NONBLOCK." << std::endl;
+		close(_socket_fd);
+		freeaddrinfo(serv_info);
+		exit(EXIT_FAILURE);
+	}
+
 	int	yes = 1;
 	status = setsockopt(_socket_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof yes);
 
@@ -111,7 +118,13 @@ void	Server::acceptClient()
 
 	if (client_fd == -1)
 		std::cerr << "new client error" << std::endl;
-	
+
+	if (fcntl(client_fd, F_SETFL, O_NONBLOCK) == -1) {
+		std::cerr << "fcntl() error on incoming client." << std::endl;
+		close(client_fd);
+		return;
+	}
+
 	inet_ntop(client_addr.ss_family, utils_get_in_addr((struct sockaddr *)&client_addr), client_ip, sizeof client_ip);
 	client_port = utils_get_port_str((struct sockaddr *)&client_addr);
 
