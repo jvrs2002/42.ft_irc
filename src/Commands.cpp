@@ -3,15 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   Commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ppassos <ppassos@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:11 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/07/18 20:59:30 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/07/18 15:44:04 by ppassos          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Commands.hpp"
-#include "Server.hpp"
+#include "Server.hpp" //extra
 #include "Utils.hpp"
 
 Commands::Commands()
@@ -169,9 +169,7 @@ void Commands::privmsg_handler(const Message& msg, Client* user, Server* server)
 		send(target_fd, priv_msg.c_str(), priv_msg.size(), MSG_NOSIGNAL);
 	}
 }
-
-// NOTICE is used to send messages without triggering automatic error replies;
-// it is primarily utilized by bots, servers, and automated services.
+//o notice serve para: enviar mensagens sem gerar erros automático sendo usado por bots, servers, serviços
 void Commands::notice_handler(const Message& msg, Client* user, Server* server)
 {
 	if (!user->isRegistered())
@@ -301,7 +299,7 @@ void Commands::mode_handler(const Message& msg, Client* user, Server* server)
 						sendReply(user->getClientFd(), server->NAME, "461", user->getNickname(), "MODE", "Not enough parameters");
 						return;
 					}
-					int max_size = std::atoi(params[arg_index++].c_str());
+					int max_size = atoi(params[arg_index++].c_str());
 					used_args += " " + params[arg_index - 1];
 					channel->setLimit('+', max_size, msg.getPrefix());
 				}
@@ -431,7 +429,7 @@ void Commands::invite_handler(const Message& msg, Client* user, Server* server)
 		sendReply(user->getClientFd(), server->NAME, "442", user->getNickname(), channel_name, "You're not on that channel");
 		return;
 	}
-	if (!channel->isOperator(user) && channel->getInvite())
+	if (!channel->isOperator(user))
 	{
 		sendReply(user->getClientFd(), server->NAME, "482", user->getNickname(), channel_name, "You're not channel operator");
 		return;
@@ -446,7 +444,7 @@ void Commands::invite_handler(const Message& msg, Client* user, Server* server)
 	
 	Client* target = server->getClientInstance(target_fd);
 	if (channel->hasUser(target)) {
-		sendReply(user->getClientFd(), server->NAME, "443", user->getNickname(), target_nick, "is already on channel");
+		sendReply(user->getClientFd(), server->NAME, "443", user->getNickname(), target_nick, "is already on channel");//fd, server->NAME, "443", user->getNickname(), target_nick + " " + channel_name, "is already on channel
 		return;
 	}
 
