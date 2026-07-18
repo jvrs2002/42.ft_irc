@@ -6,7 +6,7 @@
 /*   By: ppassos <ppassos@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:51 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/07/14 13:40:26 by ppassos          ###   ########.fr       */
+/*   Updated: 2026/07/18 16:03:41 by ppassos          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -175,7 +175,11 @@ void	Channel::setPassword(char sign, const std::string& password, const std::str
 	else
 		_password_active = false;
 	_password = password;
-	this->ModeBroadcast(prefix, "MODE", std::string(1, sign) + "k " + password);
+	std::string mode_param = std::string(1, sign) + "k";
+	if (sign == '+' && !password.empty())
+    	mode_param += " " + password;
+	this->ModeBroadcast(prefix, "MODE", mode_param);
+	//this->ModeBroadcast(prefix, "MODE", std::string(1, sign) + "k " + password); //mudei o espaco do "k " para "k"
 }
 
 void	Channel::setOperator(char sign, const std::string& nickname, const std::string& prefix)

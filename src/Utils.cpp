@@ -6,7 +6,7 @@
 /*   By: ppassos <ppassos@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:09:58 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/07/14 13:40:58 by ppassos          ###   ########.fr       */
+/*   Updated: 2026/07/18 16:00:13 by ppassos          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ std::string utils_get_port_str(struct sockaddr *sa)
 void sendReply(int Clientfd, const std::string& server, const std::string& code, 
 	const std::string& target, const std::string& params, const std::string& trailing) //tinha de por msg_nosignal
 {
-	std::string msg = ":" + server + " " + code + " " + target + " " + params + " :" + trailing + "\r\n";
+	std::string msg = ":" + server + " " + code + " " + target + (params.empty() ? "" : " " + params) + " :" + trailing + "\r\n";
 	send(Clientfd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
 }
 
