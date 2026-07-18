@@ -196,8 +196,6 @@ void	Channel::setOperator(char sign, const std::string& nickname, const std::str
 		_operators.insert(tmp);
 	else if (sign == '-' && _operators.count(tmp))
 		_operators.erase(tmp);
-	else 
-	 // return error
 	this->ModeBroadcast(prefix, "MODE", std::string(1, sign) + "o " + nickname);
 }
 
@@ -221,6 +219,27 @@ std::string Channel::getName() const {
 
 std::string Channel::getTopic() const {
 	return (this->_topic);
+}
+
+std::string Channel::getModeString() const {
+	std::string modes = "+";
+	std::string params;
+
+	if (_invite_active)
+		modes += "i";
+	if (_topic_active)
+		modes += "t";
+	if (_password_active)
+	{
+		modes += "k";
+		params += " " + _password;
+	}
+	if (_user_limit_active)
+	{
+		modes += "l";
+		params += " " + intToString(_user_limit);
+	}
+	return (modes + params);
 }
 
 bool	Channel::getInvite() const {

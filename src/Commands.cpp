@@ -340,15 +340,13 @@ void Commands::mode_handler(const Message& msg, Client* user, Server* server) //
 	}
 
 	std::vector<std::string> params = msg.getParams();
-	if (params.size() < 2)
+	if (params.empty())
 	{
 		sendReply(user->getClientFd(), server->NAME, "461",
 			user->getNickname(), "MODE", "Not enough parameters");
 		return;
 	}
-
 	const std::string& channel_name = params[0];
-	const std::string& modestring = params[1];
 
 	Channel* channel = server->getChannel(channel_name);
 	if (!channel)
@@ -357,6 +355,14 @@ void Commands::mode_handler(const Message& msg, Client* user, Server* server) //
 			user->getNickname(), channel_name, "No such channel");
 		return;
 	}
+
+	if (params.size() < 2)
+	{
+		sendReply(user->getClientFd(), server->NAME, "324",
+			user->getNickname(), channel_name, channel->getModeString());
+		return;
+	}
+	const std::string& modestring = params[1];
 
 	if (!channel->isOperator(user))
 	{
