@@ -6,7 +6,7 @@
 /*   By: ppassos <ppassos@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:11 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/07/14 13:40:50 by ppassos          ###   ########.fr       */
+/*   Updated: 2026/07/18 15:44:04 by ppassos          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -138,6 +138,8 @@ void Commands::join_handler(const Message& msg, Client* user, Server* server) //
 			user->getNickname(), channel_name, "User is already in channel");
 		return;
 	}
+	if (!user->addToChannel(channel))
+		return;
 	channel->joinChannel(msg.getPrefix(), user, password, server->NAME);
 }
 
@@ -437,8 +439,7 @@ void Commands::mode_handler(const Message& msg, Client* user, Server* server) //
 			}
 		}
 	}
-
-	channel->ChannelBroadcast(msg.getPrefix(),"MODE", channel_name + " " + modestring + used_args);
+	//tirei:channel->ChannelBroadcast(msg.getPrefix(),"MODE", channel_name + " " + modestring + used_args);
 }
 
 void	Commands::topic_handler(const Message& msg, Client* user, Server* server) //revisto mas testar se aplica as mudanças no hexchat
@@ -608,7 +609,10 @@ void Commands::nick_handler(const Message& msg, Client* user, Server* server)
 	user->setNickname(params[0]); //criar new
 	std::string rmsg = ":" + oldNick + "!" + user->getUsername() + "@" + user->getClientIP() + " NICK :" + user->getNickname() + "\r\n";
 	if (user->isRegistered())
-		user->Cbroadcast(rmsg);//comunicar com  todos os clientes que foi mudado o nick do cliente que esta ligado pelos canais 
+	{
+		user->Cbroadcast(rmsg);//comunicar com  todos os clientes que foi mudado o nick do cliente que esta ligado pelos canais
+		send(user->getClientFd(), rmsg.c_str(), rmsg.size(), MSG_NOSIGNAL);
+	}
 	if (!(user->isRegistered()) && !user->getNickname().empty() && !user->getUsername().empty() && user->isAuthenticated()) // esta bem pq verifica se nao esta empty
 	{
 		user->setRegistered();
