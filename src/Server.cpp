@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/07/18 17:59:02 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/07/18 20:50:10 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ Server::Server(const std::string& ip, const std::string& port, const std::string
 	_BACKLOG(10),
 	_running(true),
 	_error_code(0),
-	NAME("irc.ft_irc.net") // still need to pick a name
+	NAME("irc.ft_irc.net")
 {
 	Server::initServer();
 }
@@ -40,7 +40,7 @@ void	Server::initServer()
 	struct addrinfo	hints;
 	struct addrinfo	*serv_info;
 
-	memset(&hints, 0, sizeof (hints)); // CHANGE THIS FUNCTION
+	std::fill(reinterpret_cast<char*>(&hints), reinterpret_cast<char*>(&hints) + sizeof(hints), 0);
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = AI_PASSIVE;
@@ -173,10 +173,7 @@ bool	Server::deleteChannel(const std::string& channel_name)
 void	Server::disconnectClient(Client *user)
 {
 	if (!user)
-	{
-		shutdownServer(66); // used only to debug, ideally only return should be called
 		return ;
-	}
 
 	int	client_fd = user->getClientFd();
 	std::vector<struct pollfd>::iterator it = _pollfd_vector.begin();
@@ -210,7 +207,6 @@ bool	Server::createChannel(const std::string& channel_name, Client *creator)
 // the main's while loop depends on the _running as a condition
 void	Server::shutdownServer(int error_code)
 {
-	// maybe use broadcast();
 	_running = false;
 	_error_code = error_code;
 }
@@ -242,7 +238,7 @@ void	Server::run()
 	_pollfd_vector[0].fd == _socket_fd) {
 		events_count = poll(&_pollfd_vector[0], _pollfd_vector.size(), -1);
 		if (events_count == -1) {
-			if (errno == EINTR) // pay attention and explain it
+			if (errno == EINTR)
 				continue ;
 			shutdownServer(EXIT_FAILURE);
 			return ;
@@ -280,7 +276,7 @@ void	Server::processEvents(int events_count)
 					command = active_client->handlePartialBuffer();
 					while (!command.empty()) { // if empty it's still not ready to be read
 						std::cout << command << std::endl;
-						Message	msg(active_client, command); // ask to build Message constructor with const &string and Client
+						Message	msg(active_client, command);
 						_command_handler.Commandhandler(msg, active_client, this);
 						command = active_client->handlePartialBuffer();
 					}
@@ -292,8 +288,8 @@ void	Server::processEvents(int events_count)
 	}
 
 	if (events_count != 0) {
-		std::cerr << "events_count error" << std::endl;
-		shutdownServer(42); // debug possible _pollfd_vector management errors
+		std::cerr << "events_count error: " << std::endl;
+		shutdownServer(42);
 	}
 }
 

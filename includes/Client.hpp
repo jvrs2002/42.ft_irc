@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:08 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/15 18:46:45 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/07/18 21:03:24 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ private:
 	std::string	_ip;
 	std::string	_port;
 
-	int	_socket_fd; // client's socket fd
+	int	_socket_fd;					// client's socket fd
 
 	std::string	_buffer;
 public:
@@ -73,8 +73,8 @@ public:
 	bool				setRealname(const std::string& realname);
 	bool				disconnectChannel(Channel *channel);
 	std::string			handlePartialBuffer();
-	void Cbroadcast(const std::string& msg); //extra
-	bool ValidNick(const std::string& nick); //extra
+	void				Cbroadcast(const std::string& msg);
+	bool				ValidNick(const std::string& nick);
 };
 
 #endif
