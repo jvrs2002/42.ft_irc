@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:06 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/07/14 14:58:58 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/07/18 15:55:54 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,13 +42,13 @@ Client::~Client()
 		close(_socket_fd);
 	
 	_buffer.clear();
-	/* std::set<Channel*>::iterator it; // error starting from here
+	std::set<Channel*>::iterator it; // error starting from here
 
 	for (it = _channels.begin(); it != _channels.end(); ++it) {
 			(*it)->removeUser(this); // what happens if he's not connected to any?
 	}
 
-	_channels.clear(); */
+	_channels.clear();
 }
 
 bool	Client::initClient(const std::string& ip, const std::string& port, int fd)

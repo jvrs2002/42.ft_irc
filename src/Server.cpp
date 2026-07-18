@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/07/07 17:07:23 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/07/18 16:11:47 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -202,9 +202,8 @@ bool	Server::createChannel(const std::string& channel_name, Client *creator)
 	if (_channel_map.find(channel_name) != _channel_map.end())
 		return false;
 
-	Channel	new_channel(channel_name, creator); // ERROR: ask to build a default constructor with an init function inside it
-	creator->addToChannel(&new_channel);
-	_channel_map[channel_name] = new_channel;
+	_channel_map[channel_name] = Channel(channel_name, creator);
+	creator->addToChannel(&_channel_map[channel_name]);
 	return true;
 }
 
