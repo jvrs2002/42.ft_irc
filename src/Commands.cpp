@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ppassos <ppassos@student.42.fr>            +#+  +:+       +#+        */
+/*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:11 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/07/18 15:44:04 by ppassos          ###   ########.fr       */
+/*   Updated: 2026/07/21 22:07:01 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ Commands::Commands()
 	_handler["PASS"] = &pass_handler;
 	_handler["USER"] = &user_handler;
 	_handler["NICK"] = &nick_handler;
+	_handler["LIST"] = &list_handler;
 }
 
 Commands::~Commands()
@@ -536,4 +537,9 @@ void Commands::user_handler(const Message& msg, Client* user, Server* server)
 		user->setRegistered();
 		sendReply(user->getClientFd(), server->NAME, "001", user->getNickname(), "", "Welcome to the IRC server");
 	}
+}
+
+void Commands::list_handler(const Message& msg, Client* user, Server *server)
+{
+	for ()
 }

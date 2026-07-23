@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:15 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/07/18 21:02:23 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/07/21 21:40:08 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,9 +43,8 @@ private:
 		static void topic_handler(const Message& msg, Client* user, Server* server);
 		static void kick_handler(const Message& msg, Client* user, Server* server);
 		static void invite_handler(const Message& msg, Client* user, Server* server);
-		
+		static void list_handler(const Message& msg, Client* user, Server *server);
 
-		
 		typedef void (*PFnCommandHandler)(const Message&, Client*, Server*);
 		std::map<std::string, PFnCommandHandler> _handler;
 		
