@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 18:54:26 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/19 13:31:37 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/07/18 21:00:45 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,7 @@
 std::string	intToString(int number);
 void*		utils_get_in_addr(struct sockaddr *sa);
 std::string	utils_get_port_str(struct sockaddr *sa);
-void sendReply(int Clientfd, const std::string& server, const std::string& code, 
-	const std::string& target, const std::string& params, const std::string& trailing);
-
+void sendReply(int Clientfd, const std::string& server, const std::string& code,
+const std::string& target, const std::string& params, const std::string& trailing);
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/07/07 16:30:52 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/07/18 21:14:45 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ Server::Server(const std::string& ip, const std::string& port, const std::string
 	_BACKLOG(10),
 	_running(true),
 	_error_code(0),
-	NAME("irc.ft_irc.net") // still need to pick a name
+	NAME("irc.ft_irc.net")
 {
 	Server::initServer();
 }
@@ -40,7 +40,7 @@ void	Server::initServer()
 	struct addrinfo	hints;
 	struct addrinfo	*serv_info;
 
-	memset(&hints, 0, sizeof (hints)); // CHANGE THIS FUNCTION
+	std::fill(reinterpret_cast<char*>(&hints), reinterpret_cast<char*>(&hints) + sizeof(hints), 0);
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = AI_PASSIVE;
@@ -60,6 +60,13 @@ void	Server::initServer()
 
 	if (_socket_fd == -1) {
 		std::cerr << "socket() error." << std::endl;
+		freeaddrinfo(serv_info);
+		exit(EXIT_FAILURE);
+	}
+
+	if (fcntl(_socket_fd, F_SETFL, O_NONBLOCK) == -1) {
+		std::cerr << "fcntl() error setting O_NONBLOCK." << std::endl;
+		close(_socket_fd);
 		freeaddrinfo(serv_info);
 		exit(EXIT_FAILURE);
 	}
@@ -111,11 +118,17 @@ void	Server::acceptClient()
 
 	if (client_fd == -1)
 		std::cerr << "new client error" << std::endl;
-	
+
+	if (fcntl(client_fd, F_SETFL, O_NONBLOCK) == -1) {
+		std::cerr << "fcntl() error on incoming client." << std::endl;
+		close(client_fd);
+		return;
+	}
+
 	inet_ntop(client_addr.ss_family, utils_get_in_addr((struct sockaddr *)&client_addr), client_ip, sizeof client_ip);
 	client_port = utils_get_port_str((struct sockaddr *)&client_addr);
 
-	std::cout << "server: got connection from IP " << client_ip << "using PORT "<< client_port << std::endl; // testing
+	std::cout << "server: got connection from IP " << client_ip << " using PORT "<< client_port << std::endl; // testing
 
 	addClient(client_ip, client_port, client_fd);
 }
@@ -173,13 +186,12 @@ bool	Server::deleteChannel(const std::string& channel_name)
 void	Server::disconnectClient(Client *user)
 {
 	if (!user)
-	{
-		shutdownServer(66); // used only to debug, ideally only return should be called
 		return ;
-	}
 
 	int	client_fd = user->getClientFd();
 	std::vector<struct pollfd>::iterator it = _pollfd_vector.begin();
+
+	std::cout << "server: disconnecting from IP " << user->getClientIP() << " using FD " << user->getClientFd() << std::endl; // testing
 
 	while (it != _pollfd_vector.end() && it->fd != client_fd)
 		++it;
@@ -200,16 +212,14 @@ bool	Server::createChannel(const std::string& channel_name, Client *creator)
 	if (_channel_map.find(channel_name) != _channel_map.end())
 		return false;
 
-	Channel	new_channel(channel_name, creator); // ERROR: ask to build a default constructor with an init function inside it
-	creator->addToChannel(&new_channel);
-	_channel_map[channel_name] = new_channel;
+	_channel_map[channel_name] = Channel(channel_name, creator);
+	creator->addToChannel(&_channel_map[channel_name]);
 	return true;
 }
 
 // the main's while loop depends on the _running as a condition
 void	Server::shutdownServer(int error_code)
 {
-	// maybe use broadcast();
 	_running = false;
 	_error_code = error_code;
 }
@@ -241,7 +251,7 @@ void	Server::run()
 	_pollfd_vector[0].fd == _socket_fd) {
 		events_count = poll(&_pollfd_vector[0], _pollfd_vector.size(), -1);
 		if (events_count == -1) {
-			if (errno == EINTR) // pay attention and explain it
+			if (errno == EINTR)
 				continue ;
 			shutdownServer(EXIT_FAILURE);
 			return ;
@@ -278,21 +288,22 @@ void	Server::processEvents(int events_count)
 				else {
 					command = active_client->handlePartialBuffer();
 					while (!command.empty()) { // if empty it's still not ready to be read
-						Message	msg(active_client, command); // ask to build Message constructor with const &string and Client
+						std::cout << command << std::endl;
+						Message	msg(active_client, command);
 						_command_handler.Commandhandler(msg, active_client, this);
 						command = active_client->handlePartialBuffer();
 					}
 				}
-				events_count--;
 			}
+			events_count--;
 		}
 		i++;
 	}
 
-/* 	if (events_count != 0) {
-		std::cerr << "events_count error" << std::endl;
-		shutdownServer(42); // debug possible _pollfd_vector management errors
-	} */
+	if (events_count != 0) {
+		std::cerr << "events_count error: " << std::endl;
+		shutdownServer(42);
+	}
 }
 
 Client* Server::getClientInstance(int client_fd)
@@ -313,6 +324,7 @@ bool	Server::authenticate(const std::string& user_pass, Client *user)
 
 	if (user_pass == _password) {
 		user->setAuthenticated();
+		std::cout << "server: user with FD " << user->getClientFd() << " is authenticated" << std::endl;
 		return true;
 	}
 

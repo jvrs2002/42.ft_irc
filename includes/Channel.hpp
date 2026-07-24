@@ -56,6 +56,7 @@ public:
 
 	std::string getName() const;
 	std::string	getTopic() const;
+	std::string	getModeString() const;
 	bool		getInvite() const;
 	bool		hasUser(Client *user) const;
 	bool		hasTopic();

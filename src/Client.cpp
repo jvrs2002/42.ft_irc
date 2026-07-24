@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:06 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/07/07 16:27:18 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/07/18 20:37:24 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ Client::~Client()
 	std::set<Channel*>::iterator it;
 
 	for (it = _channels.begin(); it != _channels.end(); ++it) {
-			(*it)->removeUser(this); // what happens if he's not connected to any?
+		(*it)->removeUser(this);
 	}
 
 	_channels.clear();
@@ -200,57 +200,51 @@ std::string	Client::handlePartialBuffer()
 	return substr_buffer;
 }
 
-//extra from protocolist person
-
-
-void Client::Cbroadcast(const std::string& msg) // so para os chanels que o client esta
+void Client::Cbroadcast(const std::string& msg)
 {
-    std::set<Client*> sent;
+	std::set<Client*> sent;
 
-    std::set<Channel*>::iterator it = _channels.begin();
-    while (it != _channels.end())
-    {
-        Channel* channel = *it;
+	std::set<Channel*>::iterator it = _channels.begin();
+	while (it != _channels.end())
+	{
+		Channel* channel = *it;
 
-        const std::set<Client*>& users = channel->getUsers();
+		const std::set<Client*>& users = channel->getUsers();
 
-        std::set<Client*>::iterator cit = users.begin();
-        while (cit != users.end())
-        {
-            Client* target = *cit;
+		std::set<Client*>::iterator cit = users.begin();
+		while (cit != users.end())
+		{
+			Client* target = *cit;
 
-            if (target && target != this && sent.find(target) == sent.end())
-            {
-                send(target->getClientFd(), msg.c_str(), msg.size(), 0);
-                sent.insert(target);
-            }
-            ++cit;
-        }
-        ++it;
-    }
+			if (target && target != this && sent.find(target) == sent.end())
+			{
+				send(target->getClientFd(), msg.c_str(), msg.size(), MSG_NOSIGNAL);
+				sent.insert(target);
+			}
+			++cit;
+		}
+		++it;
+	}
 }
 
 bool Client::ValidNick(const std::string& nick)
 {
-    if (nick.empty())
-        return false;
+	if (nick.empty())
+		return false;
 
-    // limite comum
-    if (nick.size() > 9)
-        return false;
+	if (nick.size() > 9)
+		return false;
 
-    // primeiro char deve ser letra ou alguns símbolos permitidos
-    if (!isalpha(nick[0]) && nick[0] != '_' && nick[0] != '-')
-        return false;
+	if (!isalpha(nick[0]) && nick[0] != '_' && nick[0] != '-')
+		return false;
 
-    for (size_t i = 0; i < nick.size(); i++)
-    {
-        char c = nick[i];
+	for (size_t i = 0; i < nick.size(); i++)
+	{
+		char c = nick[i];
 
-        // permitido: letras, números, '_' e '-'
-        if (!isalnum(c) && c != '_' && c != '-')
-            return false;
-    }
+		if (!isalnum(c) && c != '_' && c != '-')
+			return false;
+	}
 
-    return true;
+	return true;
 }
