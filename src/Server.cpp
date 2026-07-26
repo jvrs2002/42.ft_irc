@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/07/18 21:14:45 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/07/26 22:59:42 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,12 +117,15 @@ void	Server::acceptClient()
 	int	client_fd = accept(_socket_fd, (struct sockaddr *)&client_addr, &sin_size);
 
 	if (client_fd == -1)
+	{
 		std::cerr << "new client error" << std::endl;
+		return ;
+	}
 
 	if (fcntl(client_fd, F_SETFL, O_NONBLOCK) == -1) {
 		std::cerr << "fcntl() error on incoming client." << std::endl;
 		close(client_fd);
-		return;
+		return ;
 	}
 
 	inet_ntop(client_addr.ss_family, utils_get_in_addr((struct sockaddr *)&client_addr), client_ip, sizeof client_ip);
