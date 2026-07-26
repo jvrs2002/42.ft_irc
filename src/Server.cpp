@@ -277,7 +277,7 @@ void	Server::processEvents(int events_count)
 		return ;
 	
 	while (events_count > 0 && i < _pollfd_vector.size()) {
-		if (_pollfd_vector[i].revents == POLLIN) {
+		if (_pollfd_vector[i].revents & (POLLIN | POLLHUP | POLLERR)) {
 			active_client = getClientInstance(_pollfd_vector[i].fd);
 			if (!active_client) // new client to be added
 				acceptClient();
