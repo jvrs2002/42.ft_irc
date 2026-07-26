@@ -330,3 +330,9 @@ bool	Server::authenticate(const std::string& user_pass, Client *user)
 
 	return false;
 }
+
+const std::map<std::string, Channel>& Server::getChannelMap() const
+{
+	return _channel_map;
+}
+

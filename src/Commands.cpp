@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ppassos <ppassos@student.42.fr>            +#+  +:+       +#+        */
+/*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:11 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/07/18 15:44:04 by ppassos          ###   ########.fr       */
+/*   Updated: 2026/07/26 19:29:00 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ Commands::Commands()
 	_handler["PASS"] = &pass_handler;
 	_handler["USER"] = &user_handler;
 	_handler["NICK"] = &nick_handler;
+	_handler["LIST"] = &list_handler;
 }
 
 Commands::~Commands()
@@ -527,7 +528,7 @@ void Commands::user_handler(const Message& msg, Client* user, Server* server)
 	}
 	if(params.size() < 4){
 		sendReply(user->getClientFd(), server->NAME, "461", user->getNickname(), "USER", "Not enough parameters");
-		return ;	
+		return ;
 	}
 	user->setUsername(params[0]);
 	user->setRealname(params[3]);
@@ -536,4 +537,47 @@ void Commands::user_handler(const Message& msg, Client* user, Server* server)
 		user->setRegistered();
 		sendReply(user->getClientFd(), server->NAME, "001", user->getNickname(), "", "Welcome to the IRC server");
 	}
+}
+
+void Commands::list_handler(const Message& msg, Client* user, Server* server)
+{
+	if (!user->isRegistered())
+	{
+		sendReply(user->getClientFd(), server->NAME, "451",
+			user->getNickname(), "", "You have not registered");
+		return;
+	}
+
+	sendReply(user->getClientFd(), server->NAME, "321", user->getNickname(), "Channel", "Users Name");
+
+	std::vector<std::string> params = msg.getParams();
+	if (params.empty())
+	{
+		const std::map<std::string, Channel>& channels = server->getChannelMap();
+		for (std::map<std::string, Channel>::const_iterator it = channels.begin(); it != channels.end(); ++it)
+		{
+			std::string chan_name = it->first;
+			const Channel& channel = it->second;
+			sendReply(user->getClientFd(), server->NAME, "322",
+				user->getNickname(), chan_name + " " + intToString(channel.getUsers().size()), channel.getTopic());
+		}
+	}
+	else
+	{
+		std::stringstream ss(params[0]);
+		std::string chan_name;
+		while (std::getline(ss, chan_name, ','))
+		{
+			if (chan_name.empty())
+				continue;
+			Channel* channel = server->getChannel(chan_name);
+			if (channel)
+			{
+				sendReply(user->getClientFd(), server->NAME, "322",
+					user->getNickname(), channel->getName() + " " + intToString(channel->getUsers().size()), channel->getTopic());
+			}
+		}
+	}
+
+	sendReply(user->getClientFd(), server->NAME, "323", user->getNickname(), "", "End of /LIST");
 }

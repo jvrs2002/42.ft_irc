@@ -64,6 +64,7 @@ public:
 	int			getClientFd(const std::string& nickname) const;
 	Client*		getClientInstance(int client_fd);
 	Channel*	getChannel(const std::string& channel_name);
+	const std::map<std::string, Channel>& getChannelMap() const;
 	bool		deleteChannel(const std::string& channel_name);
 	void		disconnectClient(Client *user);
 	void		shutdownServer(int error_code);
