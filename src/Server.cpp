@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/07/18 21:14:45 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/07/27 20:36:36 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,7 +107,7 @@ void	Server::initServer()
 	_pollfd_vector.push_back(pfd);
 }
 
-void	Server::acceptClient()
+int	Server::acceptClient()
 {
 	struct sockaddr_storage	client_addr;
 	std::string				client_port;
@@ -117,12 +117,15 @@ void	Server::acceptClient()
 	int	client_fd = accept(_socket_fd, (struct sockaddr *)&client_addr, &sin_size);
 
 	if (client_fd == -1)
+	{
 		std::cerr << "new client error" << std::endl;
+		return -1;
+	}
 
 	if (fcntl(client_fd, F_SETFL, O_NONBLOCK) == -1) {
 		std::cerr << "fcntl() error on incoming client." << std::endl;
 		close(client_fd);
-		return;
+		return -1;
 	}
 
 	inet_ntop(client_addr.ss_family, utils_get_in_addr((struct sockaddr *)&client_addr), client_ip, sizeof client_ip);
@@ -131,6 +134,7 @@ void	Server::acceptClient()
 	std::cout << "server: got connection from IP " << client_ip << " using PORT "<< client_port << std::endl; // testing
 
 	addClient(client_ip, client_port, client_fd);
+	return 0;
 }
 
 void	Server::addClient(const std::string& ip, const std::string& port, int client_fd)
@@ -274,10 +278,13 @@ void	Server::processEvents(int events_count)
 		return ;
 	
 	while (events_count > 0 && i < _pollfd_vector.size()) {
-		if (_pollfd_vector[i].revents == POLLIN) {
+		if (_pollfd_vector[i].revents & (POLLIN | POLLHUP | POLLERR)) {
 			active_client = getClientInstance(_pollfd_vector[i].fd);
 			if (!active_client) // new client to be added
-				acceptClient();
+			{
+				if (acceptClient() == -1)
+					continue ;
+			}
 			else {
 				status = active_client->receiveBuffer();
 				if (status == Client::RECV_EOF) {
@@ -330,3 +337,9 @@ bool	Server::authenticate(const std::string& user_pass, Client *user)
 
 	return false;
 }
+
+const std::map<std::string, Channel>& Server::getChannelMap() const
+{
+	return _channel_map;
+}
+
