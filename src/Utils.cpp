@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
+/*   By: manelcarvalho <manelcarvalho@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:09:58 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/07/18 21:00:28 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/07/30 13:12:13 by manelcarval      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,4 +49,14 @@ void sendReply(int Clientfd, const std::string& server, const std::string& code,
 {
 	std::string msg = ":" + server + " " + code + " " + target + (params.empty() ? "" : " " + params) + " :" + trailing + "\r\n";
 	send(Clientfd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
+}
+
+bool validChannelName(const std::string& name)
+{
+	bool i = true;
+	i = name.size() > 1 
+		&& name[0] == '#' 
+		&& name.find(' ') == std::string::npos 
+		&& name.find(',') == std::string::npos;
+	return (i);
 }
