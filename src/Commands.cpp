@@ -28,6 +28,7 @@ Commands::Commands()
 	_handler["USER"] = &user_handler;
 	_handler["NICK"] = &nick_handler;
 	_handler["LIST"] = &list_handler;
+	_handler["QUIT"] = &quit_handler;
 }
 
 Commands::~Commands()
@@ -580,4 +581,12 @@ void Commands::list_handler(const Message& msg, Client* user, Server* server)
 	}
 
 	sendReply(user->getClientFd(), server->NAME, "323", user->getNickname(), "", "End of /LIST");
+}
+
+void Commands::quit_handler(const Message& msg, Client* user, Server* server)
+{
+	std::vector<std::string> params = msg.getParams();
+	std::string reason = params.empty() ? "Client Quit" : params[0];
+
+	server->disconnectClient(user, reason);
 }

@@ -121,7 +121,7 @@ int	Server::acceptClient()
 		std::cerr << "new client error" << std::endl;
 		if (!_pollfd_vector.empty() && _pollfd_vector[0].fd == _socket_fd)
 			_pollfd_vector[0].events = 0;
-		return ;
+		return -1;
 	}
 
 	if (fcntl(client_fd, F_SETFL, O_NONBLOCK) == -1) {
@@ -189,12 +189,38 @@ bool	Server::deleteChannel(const std::string& channel_name)
 	return true;
 }
 
-void	Server::disconnectClient(Client *user)
+void	Server::disconnectClient(Client *user, const std::string& reason)
 {
 	if (!user)
 		return ;
 
 	int	client_fd = user->getClientFd();
+
+	if (user->isRegistered())
+	{
+		std::string prefix = ":" + user->getNickname() + "!" + user->getUsername() + "@" + user->getClientIP();
+		std::string quit_msg = prefix + " QUIT :" + (reason.empty() ? "Client Quit" : reason) + "\r\n";
+		user->Cbroadcast(quit_msg);
+	}
+
+	std::map<std::string, Channel>::iterator it_chan = _channel_map.begin();
+	while (it_chan != _channel_map.end())
+	{
+		if (it_chan->second.hasUser(user))
+		{
+			it_chan->second.removeUser(user);
+			user->disconnectChannel(&(it_chan->second));
+			if (it_chan->second.emptyChannel())
+			{
+				std::map<std::string, Channel>::iterator tmp = it_chan;
+				++it_chan;
+				_channel_map.erase(tmp);
+				continue;
+			}
+		}
+		++it_chan;
+	}
+
 	std::vector<struct pollfd>::iterator it = _pollfd_vector.begin();
 
 	std::cout << "server: disconnecting from IP " << user->getClientIP() << " using FD " << user->getClientFd() << std::endl; // testing
@@ -303,8 +329,14 @@ void	Server::processEvents()
 					command = active_client->handlePartialBuffer();
 					while (!command.empty()) { // if empty it's still not ready to be read
 						std::cout << command << std::endl;
+						int current_fd = active_client->getClientFd();
 						Message	msg(active_client, command);
 						_command_handler.Commandhandler(msg, active_client, this);
+						if (getClientInstance(current_fd) == NULL) {
+							if (i > 0)
+								i--;
+							break;
+						}
 						command = active_client->handlePartialBuffer();
 					}
 				}

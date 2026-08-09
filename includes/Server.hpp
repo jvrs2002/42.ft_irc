@@ -66,7 +66,7 @@ public:
 	Channel*	getChannel(const std::string& channel_name);
 	const std::map<std::string, Channel>& getChannelMap() const;
 	bool		deleteChannel(const std::string& channel_name);
-	void		disconnectClient(Client *user);
+	void		disconnectClient(Client *user, const std::string& reason = "Client Quit");
 	void		shutdownServer(int error_code);
 	int			getErrorCode();
 	bool		userExists(const std::string& nickname) const;

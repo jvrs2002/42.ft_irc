@@ -45,6 +45,7 @@ private:
 		static void kick_handler(const Message& msg, Client* user, Server* server);
 		static void invite_handler(const Message& msg, Client* user, Server* server);
 		static void list_handler(const Message& msg, Client* user, Server* server);
+		static void quit_handler(const Message& msg, Client* user, Server* server);
 		
 
 		
