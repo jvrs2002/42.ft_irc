@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/08/03 16:32:56 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/08/09 21:40:32 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,7 +107,7 @@ void	Server::initServer()
 	_pollfd_vector.push_back(pfd);
 }
 
-void	Server::acceptClient()
+int	Server::acceptClient()
 {
 	struct sockaddr_storage	client_addr;
 	std::string				client_port;
@@ -127,7 +127,7 @@ void	Server::acceptClient()
 	if (fcntl(client_fd, F_SETFL, O_NONBLOCK) == -1) {
 		std::cerr << "fcntl() error on incoming client." << std::endl;
 		close(client_fd);
-		return ;
+		return -1;
 	}
 
 	inet_ntop(client_addr.ss_family, utils_get_in_addr((struct sockaddr *)&client_addr), client_ip, sizeof client_ip);
@@ -136,6 +136,7 @@ void	Server::acceptClient()
 	std::cout << "server: got connection from IP " << client_ip << " using PORT "<< client_port << std::endl; // testing
 
 	addClient(client_ip, client_port, client_fd);
+	return 0;
 }
 
 void	Server::addClient(const std::string& ip, const std::string& port, int client_fd)

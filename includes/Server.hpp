@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:25 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/19 14:44:08 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/07/27 19:32:05 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ public:
 	~Server();
 
 	void		initServer();
-	void		acceptClient();
+	int			acceptClient();
 	void		addClient(const std::string& ip, const std::string& port, int client_fd);
 	bool		createChannel(const std::string& channel_name, Client *creator);
 	int			getClientFd(const std::string& nickname) const;
