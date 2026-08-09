@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/07/26 22:59:42 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/08/03 16:32:56 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,6 +119,8 @@ void	Server::acceptClient()
 	if (client_fd == -1)
 	{
 		std::cerr << "new client error" << std::endl;
+		if (!_pollfd_vector.empty() && _pollfd_vector[0].fd == _socket_fd)
+			_pollfd_vector[0].events = 0;
 		return ;
 	}
 
@@ -203,6 +205,9 @@ void	Server::disconnectClient(Client *user)
 		_pollfd_vector.erase(it);
 
 	_client_map.erase(client_fd);
+
+	if (!_pollfd_vector.empty() && _pollfd_vector[0].fd == _socket_fd)
+		_pollfd_vector[0].events = POLLIN;
 }
 
 /*	This function doesn't add the new channel into the creator's map.
@@ -259,36 +264,41 @@ void	Server::run()
 			shutdownServer(EXIT_FAILURE);
 			return ;
 		}
-		if (events_count == 0)
+		if (events_count <= 0)
 			continue ;
-		processEvents(events_count);
+		processEvents();
 	}
 }
 
-void	Server::processEvents(int events_count)
+void	Server::processEvents()
 {
-	size_t	i = 0;
 	int	status = 0;
 	Client	*active_client;
 	std::string	command;
 
+	for (size_t i = 0; i < _pollfd_vector.size(); i++) {
+		if (_pollfd_vector[i].revents == 0)
+			continue ;
 
-	if (events_count == 0)
-		return ;
-	
-	while (events_count > 0 && i < _pollfd_vector.size()) {
-		if (_pollfd_vector[i].revents & (POLLIN | POLLHUP | POLLERR)) {
-			active_client = getClientInstance(_pollfd_vector[i].fd);
-			if (!active_client) // new client to be added
+		if (_pollfd_vector[i].fd == _socket_fd) {
+			if (_pollfd_vector[i].revents & POLLIN)
 				acceptClient();
-			else {
+			else if (_pollfd_vector[i].revents & (POLLHUP | POLLERR | POLLNVAL)) {
+				std::cerr << "Server listening socket error." << std::endl;
+				shutdownServer(EXIT_FAILURE);
+				return ;
+			}
+		}
+		else if (_pollfd_vector[i].revents & (POLLIN | POLLHUP | POLLERR)) {
+			active_client = getClientInstance(_pollfd_vector[i].fd);
+			if (active_client) {
 				status = active_client->receiveBuffer();
-				if (status == Client::RECV_EOF) {
+				if (status == Client::RECV_EOF || status == Client::RECV_ERROR) {
 					disconnectClient(active_client);
-					events_count--;
-					continue ;
+					if (i > 0)
+						i--;
 				}
-				else {
+				else { // message received
 					command = active_client->handlePartialBuffer();
 					while (!command.empty()) { // if empty it's still not ready to be read
 						std::cout << command << std::endl;
@@ -298,14 +308,7 @@ void	Server::processEvents(int events_count)
 					}
 				}
 			}
-			events_count--;
 		}
-		i++;
-	}
-
-	if (events_count != 0) {
-		std::cerr << "events_count error: " << std::endl;
-		shutdownServer(42);
 	}
 }
 

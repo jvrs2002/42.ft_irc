@@ -71,7 +71,7 @@ public:
 	int			getErrorCode();
 	bool		userExists(const std::string& nickname) const;
 	void		run();
-	void		processEvents(int events_count);
+	void		processEvents();
 	bool		authenticate(const std::string& user_pass, Client *user);
 };
 
