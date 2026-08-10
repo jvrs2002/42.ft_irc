@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ppassos <ppassos@student.42.fr>            +#+  +:+       +#+        */
+/*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:51 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/07/18 16:03:41 by ppassos          ###   ########.fr       */
+/*   Updated: 2026/08/10 20:59:58 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,9 +91,15 @@ void	Channel::joinChannel(const std::string& prefix, Client *new_user, const std
 		send((*it)->getClientFd(), join_msg.c_str(), join_msg.size(), MSG_NOSIGNAL);
 	
 	if (_topic_active && !_topic.empty())
+	{
+		std::cout << _topic << " " << _topic_active << std::endl;
 		sendReply(new_user->getClientFd(), server_name, "332",new_user->getNickname(), _channel_name, _topic);
+	}
 	else
+	{
+		std::cout << _topic << " " << _topic_active << std::endl;
 		sendReply(new_user->getClientFd(), server_name, "331",new_user->getNickname(), _channel_name, "No topic is set");
+	}
 	std::string names = "";
 	for (std::set<Client*>::iterator it = _users.begin(); it != _users.end(); it++) {
 		if (_operators.count(*it))
@@ -123,6 +129,8 @@ void	Channel::setTopicText(const std::string& prefix, Client* user, const std::s
 		sendReply(user->getClientFd(), server_name, "482", user->getNickname(), _channel_name, "You're not channel operator");
 		return ;
 	}
+	if (!_topic_active)
+		_topic_active = true;
 	_topic = topic;
 	this->ChannelBroadcast(prefix, "TOPIC", _topic);
 }
