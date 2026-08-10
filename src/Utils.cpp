@@ -54,9 +54,17 @@ void sendReply(int Clientfd, const std::string& server, const std::string& code,
 bool validChannelName(const std::string& name)
 {
 	bool i = true;
-	i = name.size() > 1 
-		&& name[0] == '#' 
-		&& name.find(' ') == std::string::npos 
+	i = name.size() > 1
+		&& name[0] == '#'
+		&& name.find(' ') == std::string::npos
 		&& name.find(',') == std::string::npos;
 	return (i);
+}
+
+std::string toLower(const std::string& str)
+{
+	std::string result = str;
+	for (std::size_t j = 0; j < result.size(); ++j)
+		result[j] = static_cast<char>(std::tolower(static_cast<unsigned char>(result[j])));
+	return (result);
 }

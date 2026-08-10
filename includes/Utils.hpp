@@ -17,6 +17,7 @@
 # include <sys/socket.h>
 # include <sstream>
 # include <netinet/in.h>
+# include <cctype>
 
 std::string	intToString(int number);
 void*		utils_get_in_addr(struct sockaddr *sa);
@@ -24,5 +25,6 @@ std::string	utils_get_port_str(struct sockaddr *sa);
 void sendReply(int Clientfd, const std::string& server, const std::string& code,
 const std::string& target, const std::string& params, const std::string& trailing);
 bool validChannelName(const std::string& name);
+std::string toLower(const std::string& str);
 
 #endif
