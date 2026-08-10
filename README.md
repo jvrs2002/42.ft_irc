@@ -8,11 +8,6 @@ To build this, we had to dive deep into socket programming and multiplexing (non
 
 For the actual IRC protocol implementation, command parsing, and server replies, we took reference from the official IRC RFCs (primarily RFC 1459 and RFC 2812) to ensure our server behaves exactly like a real, standard-compliant IRC server.
 
-Here is the Instructions section for your README, structured around your codebase requirements and HexChat setup:
-
-
-
-Markdown
 ## Instructions
 
 ### Compilation
