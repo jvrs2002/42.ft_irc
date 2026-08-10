@@ -184,7 +184,6 @@ bool	Server::deleteChannel(const std::string& channel_name)
 	
 	if (!_channel_map[channel_name].emptyChannel())
 		return false;
-	
 	_channel_map.erase(channel_name);
 	return true;
 }
@@ -246,7 +245,6 @@ bool	Server::createChannel(const std::string& channel_name, Client *creator)
 
 	if (_channel_map.find(channel_name) != _channel_map.end())
 		return false;
-
 	_channel_map[channel_name] = Channel(channel_name, creator);
 	creator->addToChannel(&_channel_map[channel_name]);
 	return true;
