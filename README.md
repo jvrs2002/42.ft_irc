@@ -6,7 +6,7 @@
 
 To build this, we had to dive deep into socket programming and multiplexing (non-blocking I/O). [Beej's Guide to Network Programming](https://beej.us/guide/bgnet/) served as an invaluable resource for understanding the networking side of the code.
 
-For the actual IRC protocol implementation, command parsing, and server replies, we took reference from the official IRC RFCs (primarily RFC 1459 and RFC 2812) to ensure our server behaves exactly like a real, standard-compliant IRC server.
+For the actual IRC protocol implementation, command parsing, and server replies, we took reference from the official IRC RFCs (primarily RFC 1459 and RFC 2812) to ensure our server behaves like a real, standard-compliant IRC server.
 
 ## Instructions
 
