@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ppassos <ppassos@student.42.fr>            +#+  +:+       +#+        */
+/*   By: manelcarvalho <manelcarvalho@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:11 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/07/18 15:44:04 by ppassos          ###   ########.fr       */
+/*   Updated: 2026/07/30 13:10:06 by manelcarval      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,8 @@ Commands::Commands()
 	_handler["PASS"] = &pass_handler;
 	_handler["USER"] = &user_handler;
 	_handler["NICK"] = &nick_handler;
+	_handler["LIST"] = &list_handler;
+	_handler["QUIT"] = &quit_handler;
 }
 
 Commands::~Commands()
@@ -62,7 +64,7 @@ void Commands::join_handler(const Message& msg, Client* user, Server* server)
 	const std::string& channel_name = params[0];
 	std::string password = (params.size() > 1) ? params[1] : ""; 
 
-	if (channel_name.size() <= 1 || channel_name[0] != CHANNEL)
+	if (!validChannelName(channel_name))
 	{
 		sendReply(user->getClientFd(), server->NAME, "403",
 			user->getNickname(), channel_name, "No such channel");
@@ -106,7 +108,7 @@ void Commands::part_handler(const Message& msg, Client* user, Server* server)
 	Channel* channel = server->getChannel(channel_name);
 	std::string reason = (params.size() > 1) ? params [1] : "Leaving";
 	
-	if (channel == NULL)
+	if (channel == NULL || !validChannelName(channel_name))
 	{
 		sendReply(user->getClientFd(), server->NAME, "403", user->getNickname(), channel_name, "No such channel");
 		return ;
@@ -145,13 +147,13 @@ void Commands::privmsg_handler(const Message& msg, Client* user, Server* server)
 	if (!target.empty() && target[0] == CHANNEL)
 	{
 		Channel* channel = server->getChannel(target);
-		if (channel == NULL)
+		if (channel == NULL || !validChannelName(target))
 		{
 			sendReply(user->getClientFd(), server->NAME, "403", user->getNickname(), target, "No such channel");
 			return ;
 		}
 		if (!channel->hasUser(user))
-		{	
+		{
 			sendReply(user->getClientFd(), server->NAME, "404", user->getNickname(), target, "Cannot send to channel");
 			return ;
 		}
@@ -184,7 +186,7 @@ void Commands::notice_handler(const Message& msg, Client* user, Server* server)
 	if (!target.empty() && target[0] == CHANNEL)
 	{
 		Channel* channel = server->getChannel(target);
-		if (channel == NULL)
+		if (channel == NULL || !validChannelName(target))
 			return ;
 		if (!channel->hasUser(user))
 			return ;
@@ -219,7 +221,7 @@ void Commands::mode_handler(const Message& msg, Client* user, Server* server)
 	const std::string& channel_name = params[0];
 
 	Channel* channel = server->getChannel(channel_name);
-	if (!channel)
+	if (!channel || !validChannelName(channel_name))
 	{
 		sendReply(user->getClientFd(), server->NAME, "403",
 			user->getNickname(), channel_name, "No such channel");
@@ -332,12 +334,12 @@ void	Commands::topic_handler(const Message& msg, Client* user, Server* server)
 	}
 	const std::string& channel_name = params[0];
 	Channel *channel = server->getChannel(channel_name);
-	if (!channel)
+	if (!channel || !validChannelName(channel_name))
 	{
 		sendReply(user->getClientFd(), server->NAME, "403", user->getNickname(), channel_name, "No such channel");
 		return;
 	}
-	if (!channel->hasUser(user)) 
+	if (!channel->hasUser(user))
 	{
 		sendReply(user->getClientFd(), server->NAME, "442", user->getNickname(), channel_name, "You're not on that channel");
 		return;
@@ -370,7 +372,7 @@ void	Commands::kick_handler(const Message& msg, Client* user, Server* server)
 	const std::string& target_nick = params[1];
 	std::string reason = (params.size() > 2) ? params[2] : user->getNickname();
 	Channel* channel = server->getChannel(channel_name);
-	if (!channel) 
+	if (!channel || !validChannelName(channel_name))
 	{
 		sendReply(user->getClientFd(), server->NAME, "403", user->getNickname(), channel_name, "No such channel");
 		return;
@@ -385,14 +387,14 @@ void	Commands::kick_handler(const Message& msg, Client* user, Server* server)
 		sendReply(user->getClientFd(), server->NAME, "482", user->getNickname(), channel_name, "You're not channel operator");
 		return;
 	}
-	
+
 	int target_fd = server->getClientFd(target_nick);
 	if (target_fd == -1)
 	{
 		sendReply(user->getClientFd(), server->NAME, "401", user->getNickname(), target_nick, "No such nick");
 		return;
 	}
-	
+
 	Client* target = server->getClientInstance(target_fd);
 	if (!channel->hasUser(target))
 	{
@@ -419,7 +421,7 @@ void Commands::invite_handler(const Message& msg, Client* user, Server* server)
 	const std::string& target_nick = params[0];
 	const std::string& channel_name = params[1];
 	Channel* channel = server->getChannel(channel_name);
-	if (!channel) 
+	if (!channel || !validChannelName(channel_name))
 	{
 		sendReply(user->getClientFd(), server->NAME, "403", user->getNickname(), channel_name, "No such channel");
 		return;
@@ -441,7 +443,7 @@ void Commands::invite_handler(const Message& msg, Client* user, Server* server)
 		sendReply(user->getClientFd(), server->NAME, "401", user->getNickname(), target_nick, "No such nick");
 		return;
 	}
-	
+
 	Client* target = server->getClientInstance(target_fd);
 	if (channel->hasUser(target)) {
 		sendReply(user->getClientFd(), server->NAME, "443", user->getNickname(), target_nick, "is already on channel");//fd, server->NAME, "443", user->getNickname(), target_nick + " " + channel_name, "is already on channel
@@ -527,7 +529,7 @@ void Commands::user_handler(const Message& msg, Client* user, Server* server)
 	}
 	if(params.size() < 4){
 		sendReply(user->getClientFd(), server->NAME, "461", user->getNickname(), "USER", "Not enough parameters");
-		return ;	
+		return ;
 	}
 	user->setUsername(params[0]);
 	user->setRealname(params[3]);
@@ -536,4 +538,55 @@ void Commands::user_handler(const Message& msg, Client* user, Server* server)
 		user->setRegistered();
 		sendReply(user->getClientFd(), server->NAME, "001", user->getNickname(), "", "Welcome to the IRC server");
 	}
+}
+
+void Commands::list_handler(const Message& msg, Client* user, Server* server)
+{
+	if (!user->isRegistered())
+	{
+		sendReply(user->getClientFd(), server->NAME, "451",
+			user->getNickname(), "", "You have not registered");
+		return;
+	}
+
+	sendReply(user->getClientFd(), server->NAME, "321", user->getNickname(), "Channel", "Users Name");
+
+	std::vector<std::string> params = msg.getParams();
+	if (params.empty())
+	{
+		const std::map<std::string, Channel>& channels = server->getChannelMap();
+		for (std::map<std::string, Channel>::const_iterator it = channels.begin(); it != channels.end(); ++it)
+		{
+			std::string chan_name = it->first;
+			const Channel& channel = it->second;
+			sendReply(user->getClientFd(), server->NAME, "322",
+				user->getNickname(), chan_name + " " + intToString(channel.getUsers().size()), channel.getTopic());
+		}
+	}
+	else
+	{
+		std::stringstream ss(params[0]);
+		std::string chan_name;
+		while (std::getline(ss, chan_name, ','))
+		{
+			if (chan_name.empty())
+				continue;
+			Channel* channel = server->getChannel(chan_name);
+			if (channel)
+			{
+				sendReply(user->getClientFd(), server->NAME, "322",
+					user->getNickname(), channel->getName() + " " + intToString(channel->getUsers().size()), channel->getTopic());
+			}
+		}
+	}
+
+	sendReply(user->getClientFd(), server->NAME, "323", user->getNickname(), "", "End of /LIST");
+}
+
+void Commands::quit_handler(const Message& msg, Client* user, Server* server)
+{
+	std::vector<std::string> params = msg.getParams();
+	std::string reason = params.empty() ? "Client Quit" : params[0];
+
+	server->disconnectClient(user, reason);
 }

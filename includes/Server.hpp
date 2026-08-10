@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 18:32:25 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/06/19 14:44:08 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/07/27 19:32:05 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,19 +58,20 @@ public:
 	~Server();
 
 	void		initServer();
-	void		acceptClient();
+	int			acceptClient();
 	void		addClient(const std::string& ip, const std::string& port, int client_fd);
 	bool		createChannel(const std::string& channel_name, Client *creator);
 	int			getClientFd(const std::string& nickname) const;
 	Client*		getClientInstance(int client_fd);
 	Channel*	getChannel(const std::string& channel_name);
+	const std::map<std::string, Channel>& getChannelMap() const;
 	bool		deleteChannel(const std::string& channel_name);
-	void		disconnectClient(Client *user);
+	void		disconnectClient(Client *user, const std::string& reason = "Client Quit");
 	void		shutdownServer(int error_code);
 	int			getErrorCode();
 	bool		userExists(const std::string& nickname) const;
 	void		run();
-	void		processEvents(int events_count);
+	void		processEvents();
 	bool		authenticate(const std::string& user_pass, Client *user);
 };
 

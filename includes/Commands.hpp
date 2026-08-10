@@ -17,6 +17,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <sstream>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <poll.h>
@@ -43,6 +44,8 @@ private:
 		static void topic_handler(const Message& msg, Client* user, Server* server);
 		static void kick_handler(const Message& msg, Client* user, Server* server);
 		static void invite_handler(const Message& msg, Client* user, Server* server);
+		static void list_handler(const Message& msg, Client* user, Server* server);
+		static void quit_handler(const Message& msg, Client* user, Server* server);
 		
 
 		

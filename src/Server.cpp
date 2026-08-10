@@ -6,7 +6,7 @@
 /*   By: joao-vri <joao-vri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 19:18:29 by joao-vri          #+#    #+#             */
-/*   Updated: 2026/07/18 21:14:45 by joao-vri         ###   ########.fr       */
+/*   Updated: 2026/08/09 21:40:32 by joao-vri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,7 +107,7 @@ void	Server::initServer()
 	_pollfd_vector.push_back(pfd);
 }
 
-void	Server::acceptClient()
+int	Server::acceptClient()
 {
 	struct sockaddr_storage	client_addr;
 	std::string				client_port;
@@ -117,12 +117,17 @@ void	Server::acceptClient()
 	int	client_fd = accept(_socket_fd, (struct sockaddr *)&client_addr, &sin_size);
 
 	if (client_fd == -1)
+	{
 		std::cerr << "new client error" << std::endl;
+		if (!_pollfd_vector.empty() && _pollfd_vector[0].fd == _socket_fd)
+			_pollfd_vector[0].events = 0;
+		return -1;
+	}
 
 	if (fcntl(client_fd, F_SETFL, O_NONBLOCK) == -1) {
 		std::cerr << "fcntl() error on incoming client." << std::endl;
 		close(client_fd);
-		return;
+		return -1;
 	}
 
 	inet_ntop(client_addr.ss_family, utils_get_in_addr((struct sockaddr *)&client_addr), client_ip, sizeof client_ip);
@@ -131,6 +136,7 @@ void	Server::acceptClient()
 	std::cout << "server: got connection from IP " << client_ip << " using PORT "<< client_port << std::endl; // testing
 
 	addClient(client_ip, client_port, client_fd);
+	return 0;
 }
 
 void	Server::addClient(const std::string& ip, const std::string& port, int client_fd)
@@ -183,12 +189,38 @@ bool	Server::deleteChannel(const std::string& channel_name)
 	return true;
 }
 
-void	Server::disconnectClient(Client *user)
+void	Server::disconnectClient(Client *user, const std::string& reason)
 {
 	if (!user)
 		return ;
 
 	int	client_fd = user->getClientFd();
+
+	if (user->isRegistered())
+	{
+		std::string prefix = ":" + user->getNickname() + "!" + user->getUsername() + "@" + user->getClientIP();
+		std::string quit_msg = prefix + " QUIT :" + (reason.empty() ? "Client Quit" : reason) + "\r\n";
+		user->Cbroadcast(quit_msg);
+	}
+
+	std::map<std::string, Channel>::iterator it_chan = _channel_map.begin();
+	while (it_chan != _channel_map.end())
+	{
+		if (it_chan->second.hasUser(user))
+		{
+			it_chan->second.removeUser(user);
+			user->disconnectChannel(&(it_chan->second));
+			if (it_chan->second.emptyChannel())
+			{
+				std::map<std::string, Channel>::iterator tmp = it_chan;
+				++it_chan;
+				_channel_map.erase(tmp);
+				continue;
+			}
+		}
+		++it_chan;
+	}
+
 	std::vector<struct pollfd>::iterator it = _pollfd_vector.begin();
 
 	std::cout << "server: disconnecting from IP " << user->getClientIP() << " using FD " << user->getClientFd() << std::endl; // testing
@@ -200,6 +232,9 @@ void	Server::disconnectClient(Client *user)
 		_pollfd_vector.erase(it);
 
 	_client_map.erase(client_fd);
+
+	if (!_pollfd_vector.empty() && _pollfd_vector[0].fd == _socket_fd)
+		_pollfd_vector[0].events = POLLIN;
 }
 
 /*	This function doesn't add the new channel into the creator's map.
@@ -256,53 +291,57 @@ void	Server::run()
 			shutdownServer(EXIT_FAILURE);
 			return ;
 		}
-		if (events_count == 0)
+		if (events_count <= 0)
 			continue ;
-		processEvents(events_count);
+		processEvents();
 	}
 }
 
-void	Server::processEvents(int events_count)
+void	Server::processEvents()
 {
-	size_t	i = 0;
 	int	status = 0;
 	Client	*active_client;
 	std::string	command;
 
+	for (size_t i = 0; i < _pollfd_vector.size(); i++) {
+		if (_pollfd_vector[i].revents == 0)
+			continue ;
 
-	if (events_count == 0)
-		return ;
-	
-	while (events_count > 0 && i < _pollfd_vector.size()) {
-		if (_pollfd_vector[i].revents == POLLIN) {
-			active_client = getClientInstance(_pollfd_vector[i].fd);
-			if (!active_client) // new client to be added
+		if (_pollfd_vector[i].fd == _socket_fd) {
+			if (_pollfd_vector[i].revents & POLLIN)
 				acceptClient();
-			else {
+			else if (_pollfd_vector[i].revents & (POLLHUP | POLLERR | POLLNVAL)) {
+				std::cerr << "Server listening socket error." << std::endl;
+				shutdownServer(EXIT_FAILURE);
+				return ;
+			}
+		}
+		else if (_pollfd_vector[i].revents & (POLLIN | POLLHUP | POLLERR)) {
+			active_client = getClientInstance(_pollfd_vector[i].fd);
+			if (active_client) {
 				status = active_client->receiveBuffer();
-				if (status == Client::RECV_EOF) {
+				if (status == Client::RECV_EOF || status == Client::RECV_ERROR) {
 					disconnectClient(active_client);
-					events_count--;
-					continue ;
+					if (i > 0)
+						i--;
 				}
-				else {
+				else { // message received
 					command = active_client->handlePartialBuffer();
 					while (!command.empty()) { // if empty it's still not ready to be read
 						std::cout << command << std::endl;
+						int current_fd = active_client->getClientFd();
 						Message	msg(active_client, command);
 						_command_handler.Commandhandler(msg, active_client, this);
+						if (getClientInstance(current_fd) == NULL) {
+							if (i > 0)
+								i--;
+							break;
+						}
 						command = active_client->handlePartialBuffer();
 					}
 				}
 			}
-			events_count--;
 		}
-		i++;
-	}
-
-	if (events_count != 0) {
-		std::cerr << "events_count error: " << std::endl;
-		shutdownServer(42);
 	}
 }
 
@@ -330,3 +369,9 @@ bool	Server::authenticate(const std::string& user_pass, Client *user)
 
 	return false;
 }
+
+const std::map<std::string, Channel>& Server::getChannelMap() const
+{
+	return _channel_map;
+}
+
